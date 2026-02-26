@@ -1,5 +1,6 @@
 import { type PropsWithChildren } from 'react';
 import Image, { ImageProps } from 'next/image';
+import { BuyNowButton } from '@/components/buy-now-button';
 
 export default function Home() {
     return (
@@ -71,6 +72,7 @@ export default function Home() {
                         </Card>
                     </div>
                 </div>
+                <BuyNowButton />
             </main>
         </div>
     );
