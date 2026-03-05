@@ -109,7 +109,7 @@ export default function Page() {
                                 <Input
                                     name="email"
                                     type="email"
-                                    placeholder="Work email"
+                                    placeholder="Email"
                                     autoComplete="email"
                                 />
                                 {isSubmitted && emailErrorMessage && (
