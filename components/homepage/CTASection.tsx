@@ -20,7 +20,7 @@ export default function CTASection() {
                     <p className="max-w-[700px] text-muted-foreground text-lg">
                         We&apos;re preparing our first production run of PosturePad for US work-from-home professionals. Join the early access list to get updates on timing, pricing (target launch around $179), and pre-order availability.
                     </p>
-                    <Link href="/buy-now" className="mt-4">
+                    <Link href="/reserve" className="mt-4">
                         <Button size="lg" className="bg-primary hover:bg-primary/90 text-white">
                             Join the early access list
                         </Button>
