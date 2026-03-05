@@ -10,10 +10,10 @@ export default function PricingSection() {
             Pricing
           </Badge>
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            Professional-grade headshots for <span className="text-primary">a fraction</span> of the cost
+            Premium ergonomic support at an <span className="text-primary">approachable</span> price
           </h2>
           <p className="max-w-[700px] text-muted-foreground text-lg">
-            Professional photographers charge $200-$500 for a session. Our AI creates stunning headshots for much less.
+            PosturePad is designed to sit alongside the premium office chairs and wellness tools professionals already invest in—without requiring a new chair or intrusive wearable.
           </p>
         </div>
         <div className="mt-16">

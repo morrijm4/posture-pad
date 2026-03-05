@@ -2,30 +2,30 @@
 
 import { useRef, useState } from "react"
 import { motion, useInView } from "motion/react"
-import { Camera, Download, Sparkles } from "lucide-react"
+import { Activity, Bell, BarChart3 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 const processSteps = [
   {
     number: 1,
-    title: "Upload Your Photos",
-    description: "Upload 4+ high-quality selfies: front facing, 1 person in frame, no glasses or hats.",
-    icon: <Camera className="h-5 w-5" />,
+    title: "Set up PosturePad on your chair",
+    description: "Place PosturePad on your existing office chair or seat. No tools or special hardware required.",
+    icon: <Activity className="h-5 w-5" />,
     images: ["/example1.png", "/example2.png", "/example3.png"]
   },
   {
     number: 2,
-    title: "Our AI Gets to Work",
-    description: "The AI magic takes ~20 minutes. You'll get an email when it's ready!",
-    icon: <Sparkles className="h-5 w-5" />,
+    title: "Sensors quietly learn your posture",
+    description: "Embedded force sensors and on-device machine learning detect how you typically sit throughout the day.",
+    icon: <BarChart3 className="h-5 w-5" />,
     processingImage: "/blur.png"
   },
   {
     number: 3,
-    title: "Get Amazing Headshots",
-    description: "Once your model is trained, we'll give you amazing headshots!",
-    icon: <Download className="h-5 w-5" />,
+    title: "Ambient cues nudge you into alignment",
+    description: "PosturePad delivers gentle haptic or lighting cues (plus app insights) to help you maintain healthier posture—without nagging or intrusive wearables.",
+    icon: <Bell className="h-5 w-5" />,
     resultImages: ["/result1.png", "/result2.png", "/result3.png"]
   }
 ]
@@ -132,11 +132,11 @@ export default function ProcessSection() {
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center gap-4 text-center md:gap-8">
           <Badge variant="outline" className="mb-2">
-            Simple Process
+            Simple setup
           </Badge>
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">How It Works</h2>
           <p className="max-w-[700px] text-muted-foreground text-lg">
-            Our AI-powered platform transforms your selfies into professional headshots in just three simple steps.
+            PosturePad combines embedded sensors, ambient feedback, and software analytics to turn your everyday chair into a smarter, more ergonomic workstation.
           </p>
         </div>
         <div className="mt-16 grid gap-8 md:grid-cols-3 md:gap-12">

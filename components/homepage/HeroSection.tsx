@@ -10,18 +10,18 @@ export default function HeroSection() {
             <div className="container px-4 md:px-6">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <Badge className="mb-4" variant="outline">
-                        THE #1 RANKED POSTURAL ALIGNMENT COMPANY
+                        For work-from-home professionals who sit all day
                     </Badge>
                     <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl mb-6">
-                        Enabling Postural Alignment With <span className="text-primary">Ambient Devices</span>
+                        PosturePad: Smart support for <span className="text-primary">better posture</span>
                     </h1>
                     <p className="text-muted-foreground text-lg md:text-xl max-w-[800px] mx-auto">
-                        A portable haptic sleeve that detects posture using embedded sensors and machine learning.
+                        A sensor-powered seat pad that detects how you sit, then uses gentle ambient cues and analytics to nudge you back into ergonomic alignment—without intrusive wearables or bulky braces.
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-                        <Link href="/buy-now" className="w-full sm:w-auto">
+                        <Link href="/reserve" className="w-full sm:w-auto">
                             <Button size="lg" className="group hover:cursor-pointer">
-                                Buy now
+                                Reserve your PosturePad
                                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </Button>
                         </Link>

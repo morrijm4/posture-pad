@@ -74,8 +74,8 @@ export default function Page() {
             posthog.capture('newsletter_signup', { name, email });
 
             toast({
-                title: "Signed up!",
-                description: "You are now apart of our newsletter to recieve updates about PosturePad.",
+                title: "You’re on the list!",
+                description: "You’ve joined the early access list for PosturePad. We’ll email you before pre-orders go live.",
                 duration: 5000,
             });
             router.push('/');
@@ -88,11 +88,16 @@ export default function Page() {
     return (
         <div className='flex flex-col h-[calc(100vh-73px)]'>
             <div className="flex items-center justify-center p-8">
-                <div className="flex flex-col gap-8 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 p-4 rounded-xl max-w-lg w-full">
-                    <h1 className="text-4xl">Thank you!</h1>
-                    <p className="text-xl opacity-60">
-                        We are so glad that you would like to purchase PosturePad. Currently our product is in development but, you can sign up for our newsletter to stay up-to-date on our progress!
-                    </p>
+                <div className="flex flex-col gap-8 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 p-6 md:p-8 rounded-xl max-w-lg w-full">
+                    <h1 className="text-3xl md:text-4xl font-semibold">Almost there — reserve your PosturePad</h1>
+                    <div className="space-y-3 text-base md:text-lg opacity-80">
+                        <p>
+                            PosturePad is currently in development. By joining the early access list, you&apos;ll be among the first to know when pre-orders and our Kickstarter go live.
+                        </p>
+                        <p className="text-sm md:text-base">
+                            We&apos;ll send occasional updates about progress, launch timing, and ways to give feedback. <span className="font-medium">No payment is collected today.</span>
+                        </p>
+                    </div>
                     <form
                         onSubmit={handleSubmit}
                         className="flex flex-col gap-2"
@@ -105,7 +110,6 @@ export default function Page() {
                                     type="text"
                                     placeholder="Full name"
                                     autoComplete="name"
-
                                 />
                                 {isSubmitted && nameErrorMessage && (
                                     <span className={"text-xs text-red-400"}>
@@ -115,7 +119,7 @@ export default function Page() {
                                 <Input
                                     name="email"
                                     type="email"
-                                    placeholder="Email"
+                                    placeholder="Work email"
                                     autoComplete="email"
                                 />
                                 {isSubmitted && emailErrorMessage && (
@@ -133,9 +137,12 @@ export default function Page() {
                             className="w-full hover:cursor-pointer"
                             type="submit"
                         >
-                            Sign up
+                            Join the early access list
                         </Button>
                     </form>
+                    <p className="text-xs text-neutral-500">
+                        We&apos;ll only use your information to share updates about PosturePad and related launches. You can unsubscribe at any time.
+                    </p>
                 </div>
             </div>
         </div>
