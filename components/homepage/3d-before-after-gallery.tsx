@@ -262,7 +262,7 @@ export default function ThreeDBeforeAfterGallery() {
             {/* Navigation buttons */}
             <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 shadow-md hover:bg-white transition-all hover:scale-110"
+                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 shadow-md hover:bg-white transition-all hover:scale-110 hover:cursor-pointer"
                 aria-label="Previous slide"
                 disabled={isFlipping}
             >
@@ -271,7 +271,7 @@ export default function ThreeDBeforeAfterGallery() {
 
             <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 shadow-md hover:bg-white transition-all hover:scale-110"
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 shadow-md hover:bg-white transition-all hover:scale-110 hover:cursor-pointer"
                 aria-label="Next slide"
                 disabled={isFlipping}
             >

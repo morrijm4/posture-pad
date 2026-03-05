@@ -8,16 +8,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import disposableDomains from "disposable-email-domains";
 
-// emailIsValid: (value: string) =>
-//     .test(value) ||
-//     "",
-// emailDoesntHavePlus: (value: string) =>
-//     .test(value) ||
-//     "Email addresses with a '+' are not allowed",
-// emailIsntDisposable: (value: string) =>
-//     !disposableDomains.includes(value.split("@")[1]) ||
-//     "Please use a permanent email address",
-
 const EMAIL_IS_VALID = /^[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 const EMAIL_HAS_NO_PLUS = /^[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 

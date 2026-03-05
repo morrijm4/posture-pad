@@ -22,7 +22,7 @@ function FAQItem({ question, answer, isOpen, onClick, index }: FAQItemProps) {
         >
             <button
                 onClick={onClick}
-                className="flex w-full items-center justify-between py-4 text-left font-medium transition-all hover:text-primary"
+                className="flex w-full items-center justify-between py-4 text-left font-medium transition-all hover:text-primary hover:cursor-pointer"
             >
                 <span>{question}</span>
                 <ChevronDown className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`} />

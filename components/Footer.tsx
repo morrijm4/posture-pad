@@ -50,7 +50,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="/reserve"
-                                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:cursor-pointer"
                                 >
                                     Join early access list
                                 </Link>

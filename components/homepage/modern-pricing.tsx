@@ -99,7 +99,7 @@ export default function ModernPricing() {
 
                             <Link href="/reserve" className="mt-8 block w-full" aria-label={`Select ${tier.title} plan`}>
                                 <Button
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground hover:cursor-pointer"
                                     aria-label={`Select ${tier.title} plan`}
                                 >
                                     {tier.buttonText}
