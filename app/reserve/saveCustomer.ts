@@ -17,14 +17,19 @@ export async function saveCustomer({ distinctId, sessionId, name, email }: SaveC
         flushAt: 1,
     })
 
-    await postHog.captureImmediate({
-        event: 'reserve_signup',
-        distinctId,
-        properties: {
-            sessionId,
-            name: encrypt(name),
-            email: encrypt(email),
-        },
-    });
-    await postHog.shutdown();
+    try {
+        await postHog.captureImmediate({
+            event: 'reserve_signup',
+            distinctId,
+            properties: {
+                sessionId,
+                name: encrypt(name),
+                email: encrypt(email),
+            },
+        });
+    } catch (e) {
+        console.error(e);
+    } finally {
+        await postHog.shutdown();
+    }
 }
