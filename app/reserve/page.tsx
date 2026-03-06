@@ -76,13 +76,13 @@ export default function Page() {
             });
             router.push('/');
         } catch {
-        } finally {
             toast({
                 title: "Oops!",
                 description: "Looks like something went wrong when trying to add you to our early access list. We are terribly sorry! Please try again later.",
                 duration: 5000,
             });
             posthog.capture('reserve_list_error');
+        } finally {
             setIsSubmitting(false);
         }
     }
