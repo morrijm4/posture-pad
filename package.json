@@ -6,10 +6,14 @@
     },
     "license": "MIT",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start"
+        "start": "next start",
+        "genkeypair": "node ./scripts/genkeypair.ts",
+        "encrypt": "node ./scripts/encrypt.ts",
+        "decrypt": "node ./scripts/decrypt.ts"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
@@ -53,12 +57,14 @@
         "npm": "^11.11.0",
         "postcss": "^8.5.6",
         "posthog-js": "^1.356.0",
+        "posthog-node": "^5.28.0",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
         "react-dropzone": "^15.0.0",
         "react-hook-form": "^7.71.2",
         "react-icons": "^5.5.0",
         "resend": "^6.9.2",
+        "shamirs-secret-sharing": "^2.0.1",
         "stripe": "^20.4.0",
         "supports-color": "^10.2.2",
         "tailwind-merge": "^3.5.0",

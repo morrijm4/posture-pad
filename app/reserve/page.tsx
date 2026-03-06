@@ -1,6 +1,7 @@
 "use client";
 
 import posthog from 'posthog-js';
+import { saveCustomer } from './saveCustomer';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ export default function Page() {
         return !msg;
     }
 
-    function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
         setIsSubmitting(true);
         setIsSubmitted(true);
@@ -61,7 +62,12 @@ export default function Page() {
             if (!validName || !validEmail)
                 throw new ValidationError();
 
-            posthog.capture('newsletter_signup', { name, email });
+            await saveCustomer({
+                name,
+                email,
+                sessionId: posthog.get_session_id(),
+                distinctId: posthog.get_distinct_id(),
+            });
 
             toast({
                 title: "You’re on the list!",
