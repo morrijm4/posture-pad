@@ -6,7 +6,7 @@ import { privateDecrypt } from 'crypto';
 
 async function readSk(i: number): Promise<Buffer | undefined> {
     try {
-        return await readFile('sk' + i);
+        return await readFile('rsa' + i + '.key');
     } catch {/* do nothing */ }
 }
 

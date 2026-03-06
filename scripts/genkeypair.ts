@@ -32,7 +32,7 @@ async function main() {
         threshold: THRESHOLD,
     })
 
-    await Promise.all(parts.map(async (sk, i) => writeFile('sk' + i, sk)));
+    await Promise.all(parts.map(async (sk, i) => writeFile('rsa' + i + '.key', sk)));
 }
 
 main();
