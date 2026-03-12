@@ -26,7 +26,7 @@ export async function saveCustomer({ distinctId, sessionId, name, email }: SaveC
     ]);
 
     if (db.status === 'rejected') {
-        throw new Error("Failed to save to db")
+        throw db.reason
     }
 }
 
