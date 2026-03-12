@@ -1,4 +1,4 @@
-export default function ThreeDBeforeAfterGallery() {
+export default function LoopRendering() {
     return (
         <div className="relative w-full rounded-xl overflow-hidden">
             <video

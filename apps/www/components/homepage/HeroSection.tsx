@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import ThreeDBeforeAfterGallery from "@/components/homepage/3d-before-after-gallery"
+import LoopRendering from "@/components/homepage/loop-rendering"
 
 export default function HeroSection() {
     return (
@@ -28,8 +28,8 @@ export default function HeroSection() {
                     </div>
                 </div>
 
-                <div className="mt-12">
-                    <ThreeDBeforeAfterGallery />
+                <div className="mt-12 mx-auto max-w-4xl">
+                    <LoopRendering />
                 </div>
             </div>
         </section>
