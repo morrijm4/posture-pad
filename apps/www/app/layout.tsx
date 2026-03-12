@@ -26,7 +26,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="min-h-screen flex flex-col bg-background">
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false}>
                     <AnnouncementBar />
                     <Navbar />
                     <main className="flex-1">

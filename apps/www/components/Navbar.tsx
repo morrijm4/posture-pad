@@ -1,7 +1,5 @@
 import { Aperture } from "lucide-react"
 import Link from "next/link";
-import React from "react";
-import { ThemeToggle } from "./homepage/theme-toggle";
 
 export default async function Navbar() {
     return (
@@ -12,9 +10,9 @@ export default async function Navbar() {
                     <span>PosturePad</span>
                 </Link>
 
-                <div className="flex items-center gap-4">
+                {/* <div className="flex items-center gap-4">
                     <ThemeToggle />
-                </div>
+                </div> */}
             </div>
         </header>
     );

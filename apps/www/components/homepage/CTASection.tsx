@@ -1,8 +1,5 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-
-const images = ["/Drawings.jpeg"]
 
 export default function CTASection() {
     return (
@@ -20,20 +17,6 @@ export default function CTASection() {
                             Join the early access list
                         </Button>
                     </Link>
-                </div>
-
-                <div className="mt-16 flex justify-center">
-                    {images.map((src, i) => (
-                        <div key={i} className="overflow-hidden rounded-lg">
-                            <Image
-                                src={src || "/placeholder.svg"}
-                                alt="Work-from-home professional"
-                                width={600}
-                                height={800}
-                                className="h-auto w-full object-cover"
-                            />
-                        </div>
-                    ))}
                 </div>
             </div>
         </section>
