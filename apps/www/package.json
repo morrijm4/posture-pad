@@ -4,6 +4,7 @@
         "name": "Matthew Morrison",
         "email": "jmm845@cornell.edu"
     },
+    "version": "0.0.1",
     "license": "MIT",
     "private": true,
     "scripts": {

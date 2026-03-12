@@ -6,9 +6,7 @@
     "workspaces": [
         "apps/**"
     ],
-    "devDependencies": {
-        "@types/bun": "latest"
-    },
+    "devDependencies": {},
     "peerDependencies": {
         "typescript": "^5"
     }
