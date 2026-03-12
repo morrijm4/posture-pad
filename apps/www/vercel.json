@@ -1,0 +1,4 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "apt-get install -y libatomic1 && bun run build"
+}
