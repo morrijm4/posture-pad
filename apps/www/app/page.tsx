@@ -7,6 +7,7 @@ import TestimonialsSection from "@/components/homepage/TestimonialsSection"
 import PricingSection from "@/components/homepage/PricingSection"
 import FAQSection from "@/components/homepage/FAQSection"
 import CTASection from "@/components/homepage/CTASection"
+import PosturePadArmy from "@/components/homepage/PosturePadArmy"
 
 export default async function Index() {
     return (
@@ -20,6 +21,7 @@ export default async function Index() {
                 <TestimonialsSection />
                 <PricingSection />
                 <FAQSection />
+                <PosturePadArmy />
                 <CTASection />
             </div>
         </div>

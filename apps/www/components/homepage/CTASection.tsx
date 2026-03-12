@@ -2,12 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-const images = [
-    "/homepage/example0001.png",
-    "/homepage/example0002.png",
-    "/homepage/example0004.png",
-    "/homepage/example0006.png",
-]
+const images = ["/Drawings.jpeg"]
 
 export default function CTASection() {
     return (
@@ -27,14 +22,14 @@ export default function CTASection() {
                     </Link>
                 </div>
 
-                <div className="mt-16 grid gap-4 grid-cols-2 sm:grid-cols-4">
+                <div className="mt-16 flex justify-center">
                     {images.map((src, i) => (
                         <div key={i} className="overflow-hidden rounded-lg">
                             <Image
                                 src={src || "/placeholder.svg"}
                                 alt="Work-from-home professional"
-                                width={300}
-                                height={400}
+                                width={600}
+                                height={800}
                                 className="h-auto w-full object-cover"
                             />
                         </div>
