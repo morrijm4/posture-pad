@@ -1,0 +1,20 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/package.json",
+    "name": "@pp/db",
+    "private": true,
+    "version": "0.0.1",
+    "exports": {
+        "./*": "./*.ts"
+    },
+    "scripts": {
+        "push": "drizzle-kit push"
+    },
+    "dependencies": {
+        "@pp/loadenv": "workspace:*",
+        "drizzle-orm": "^0.45.1",
+        "postgres": "^3.4.8"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.31.9"
+    }
+}
