@@ -3,11 +3,7 @@
     "name": "posture-pad",
     "type": "module",
     "private": true,
-    "packageManager": "yarn@4.13.0+sha512.5c20ba010c99815433e5c8453112165e673f1c7948d8d2b267f4b5e52097538658388ebc9f9580656d9b75c5cc996f990f611f99304a2197d4c56d21eea370e7",
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
+    "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be",
     "peerDependencies": {
         "typescript": "^5"
     }
