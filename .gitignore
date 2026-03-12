@@ -26,6 +26,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .eslintcache
 .cache
 *.tsbuildinfo
+.yarn/cache/
+.yarn/unplugged/
+.yarn/install-state.gz
 
 # IntelliJ based IDEs
 .idea
