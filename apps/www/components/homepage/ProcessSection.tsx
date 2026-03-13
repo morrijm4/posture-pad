@@ -35,12 +35,12 @@ function ProcessStep({ step, isActive, index }: { step: typeof processSteps[0], 
     const renderVisual = () => {
         return (
             <motion.div
-                className="aspect-square rounded-lg overflow-hidden bg-muted"
+                className="aspect-square rounded-lg overflow-hidden"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0.5, scale: 0.95 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-                <Image src={`/Artboard-${index + 1}.svg`} alt="Result example" className="w-full h-full object-cover bg-white" width={150} height={100} />
+                <Image src={`/Artboard-${index + 1}.svg`} alt="Result example" className="w-full h-full object-cover" width={150} height={100} />
             </motion.div>
         )
     }
