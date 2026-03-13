@@ -6,19 +6,19 @@ const testimonials = [
         quote: "I didn't realize how much I was slouching until I tried an early PosturePad prototype. The cues are subtle but effective—I finish the day with far less back and neck fatigue.",
         author: "Alex Rivera",
         role: "Product Manager, hybrid worker",
-        avatarUrl: "/homepage/example0001.png"
+        // avatarUrl: "/homepage/example0001.png"
     },
     {
         quote: "I've invested in chairs and pillows before, but nothing helped me actually change my behavior. The combination of the pad and the analytics finally made my posture feel \"trackable\".",
         author: "Morgan Lee",
         role: "Independent designer",
-        avatarUrl: "/homepage/example0002.png"
+        // avatarUrl: "/homepage/example0002.png"
     },
     {
         quote: "As someone who codes from home most of the week, back pain just felt \"normal\". The idea of an ambient system that nudges me instead of nagging me is exactly what I've been looking for.",
         author: "Jordan Patel",
         role: "Software engineer",
-        avatarUrl: "/homepage/example0003.png"
+        // avatarUrl: "/homepage/example0003.png"
     }
 ]
 

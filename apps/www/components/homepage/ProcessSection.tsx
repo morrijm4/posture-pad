@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "motion/react"
 import { Activity, Bell, BarChart3 } from "lucide-react"
@@ -12,21 +13,18 @@ const processSteps = [
         title: "Set up PosturePad on your chair",
         description: "Place PosturePad on your existing office chair or seat. No tools or special hardware required.",
         icon: <Activity className="h-5 w-5" />,
-        images: ["/example1.png", "/example2.png", "/example3.png"]
     },
     {
         number: 2,
         title: "Sensors quietly learn your posture",
         description: "Embedded force sensors and on-device machine learning detect how you typically sit throughout the day.",
         icon: <BarChart3 className="h-5 w-5" />,
-        processingImage: "/blur.png"
     },
     {
         number: 3,
         title: "Ambient cues nudge you into alignment",
         description: "PosturePad delivers gentle haptic or lighting cues (plus app insights) to help you maintain healthier posture—without nagging or intrusive wearables.",
         icon: <Bell className="h-5 w-5" />,
-        resultImages: ["/result1.png", "/result2.png", "/result3.png"]
     }
 ]
 
@@ -35,59 +33,15 @@ function ProcessStep({ step, isActive, index }: { step: typeof processSteps[0], 
     const isInView = useInView(ref, { once: true, amount: 0.3 })
 
     const renderVisual = () => {
-        if (index === 0) {
-            return (
-                <div className="grid grid-cols-3 gap-2 p-4">
-                    {step.images?.map((img, i) => (
-                        <motion.div
-                            key={`upload-${i}`}
-                            className="aspect-square rounded-lg overflow-hidden bg-muted"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0.5, y: 10 }}
-                            transition={{ duration: 0.4, delay: i * 0.1 }}
-                        >
-                            <img src={img} alt="Upload example" className="w-full h-full object-cover" />
-                        </motion.div>
-                    ))}
-                </div>
-            )
-        }
-
-        if (index === 1) {
-            return (
-                <motion.div
-                    className="relative"
-                    initial={{ opacity: 0 }}
-                    animate={isInView ? { opacity: 1 } : { opacity: 0.5 }}
-                >
-                    <img src={step.processingImage} alt="AI processing" className="rounded-lg w-full" />
-                    {isInView && (
-                        <motion.div
-                            className="absolute inset-0 bg-primary/20 flex items-center justify-center rounded-lg"
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                        >
-                            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                        </motion.div>
-                    )}
-                </motion.div>
-            )
-        }
-
         return (
-            <div className="grid grid-cols-3 gap-2 p-4">
-                {step.resultImages?.map((img, i) => (
-                    <motion.div
-                        key={`result-${i}`}
-                        className="aspect-square rounded-lg overflow-hidden bg-muted"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0.5, scale: 0.95 }}
-                        transition={{ duration: 0.4, delay: i * 0.1 }}
-                    >
-                        <img src={img} alt="Result example" className="w-full h-full object-cover" />
-                    </motion.div>
-                ))}
-            </div>
+            <motion.div
+                className="aspect-square rounded-lg overflow-hidden bg-muted"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0.5, scale: 0.95 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+                <Image src={`/Artboard-${index + 1}.svg`} alt="Result example" className="w-full h-full object-cover bg-white" width={150} height={100} />
+            </motion.div>
         )
     }
 
