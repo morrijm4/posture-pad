@@ -1,19 +1,16 @@
 import Image from "next/image"
 import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 
 export default function ExamplesSection() {
     return (
         <section id="examples" className="border-t py-20 md:py-32 bg-muted/30">
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center gap-4 text-center md:gap-8">
-                    <Badge variant="outline" className="mb-2">
-                        Early concepts
-                    </Badge>
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Exploring the PosturePad experience</h2>
                     <p className="max-w-[700px] text-muted-foreground text-lg">
-                        Early visual explorations and prototypes that inform how PosturePad could live on real desks and in real work-from-home setups as we move toward launch.
+                        Early visual mockups and digital renderings that inform how PosturePad could live in office and real work-from-home environments.
                     </p>
                 </div>
                 <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-3">
@@ -43,8 +40,9 @@ export default function ExamplesSection() {
                 </div>
                 <div className="mt-12 flex justify-center">
                     <Link href="/reserve">
-                        <Button variant="outline" size="lg">
-                            Join the early access list
+                        <Button variant="outline" size="lg" className="group hover:cursor-pointer">
+                            Get early access
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Button>
                     </Link>
                 </div>

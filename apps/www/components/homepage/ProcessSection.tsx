@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "motion/react"
 import { Activity, Bell, BarChart3 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 const processSteps = [
@@ -17,13 +16,13 @@ const processSteps = [
     {
         number: 2,
         title: "Sensors quietly learn your posture",
-        description: "Embedded force sensors and on-device machine learning detect how you typically sit throughout the day.",
+        description: "Embedded force sensors and machine learning detect how you typically sit throughout the day.",
         icon: <BarChart3 className="h-5 w-5" />,
     },
     {
         number: 3,
-        title: "Ambient cues nudge you into alignment",
-        description: "PosturePad delivers gentle haptic or lighting cues (plus app insights) to help you maintain healthier posture—without nagging or intrusive wearables.",
+        title: "Ambient cues for alignment",
+        description: "PosturePad then delivers gentle haptic or lighting cues to help you maintain healthier posture.",
         icon: <Bell className="h-5 w-5" />,
     }
 ]
@@ -99,12 +98,9 @@ export default function ProcessSection() {
     }, []);
 
     return (
-        <section id="how-it-works" className="py-20 md:py-32">
+        <section id="how-it-works" className="pt-8 md:pt-12 pb-20 md:pb-32">
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center gap-4 text-center md:gap-8">
-                    <Badge variant="outline" className="mb-2">
-                        Simple setup
-                    </Badge>
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">How It Works</h2>
                     <p className="max-w-[700px] text-muted-foreground text-lg">
                         PosturePad combines embedded sensors, ambient feedback, and software analytics to turn your everyday chair into a smarter, more ergonomic workstation.

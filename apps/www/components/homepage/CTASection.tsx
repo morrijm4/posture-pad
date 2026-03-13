@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function CTASection() {
@@ -10,11 +11,12 @@ export default function CTASection() {
                         Ready to change how you sit?
                     </h2>
                     <p className="max-w-[700px] text-muted-foreground text-lg">
-                        We&apos;re preparing our first production run of PosturePad for US work-from-home professionals. Join the early access list to get updates on timing, pricing (target launch around $179), and pre-order availability.
+                        We&apos;re preparing our first product run of PosturePad for work-from-home professionals. Join the early access list to get updates on timing and pre-order availability.
                     </p>
                     <Link href="/reserve" className="mt-4">
-                        <Button size="lg" className="bg-primary hover:bg-primary/90 text-white">
+                        <Button size="lg" className="group bg-primary hover:bg-primary/90 text-white hover:cursor-pointer">
                             Join the early access list
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Button>
                     </Link>
                 </div>

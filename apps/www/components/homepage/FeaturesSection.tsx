@@ -1,5 +1,4 @@
 import { Activity, Lightbulb, BarChart3, Shield, Share2 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 
 const features = [
   {
@@ -9,12 +8,12 @@ const features = [
   },
   {
     title: "Gentle ambient cues",
-    description: "Choose between subtle haptics, lighting changes, or other ambient signals that make you aware of your posture without breaking focus.",
+    description: "Choose between haptics, lighting changes, or other ambient signals that make you aware of your posture without breaking focus.",
     icon: <Lightbulb className="h-6 w-6" />
   },
   {
     title: "Behavioral insights over time",
-    description: "View posture history, streaks, and personalized insights so you can see how your habits are changing over weeks—not just minutes.",
+    description: "View posture history, streaks, and personalized insights so you can see how your habits are changing over weeks.",
     icon: <BarChart3 className="h-6 w-6" />
   },
   {
@@ -24,12 +23,12 @@ const features = [
   },
   {
     title: "Built for the modern home office",
-    description: "Planned integrations with laptops, smart bulbs (like Philips Hue), and voice assistants to make posture feedback part of your broader home setup.",
+    description: "Planned integrations with laptops, smart bulbs, and voice assistants to make posture feedback part of your broader home setup.",
     icon: <Share2 className="h-6 w-6" />
   },
   {
-    title: "Evidence- and feedback-backed",
-    description: "Shaped by 20+ user interviews and emerging research on digital therapeutics and sedentary work, with a build-in-public roadmap that incorporates real-world feedback.",
+    title: "Evidenc and feedback based",
+    description: "Shaped by user interviews and research on digital therapeutics and sedentary work, PosturePad is built with informed context.",
     icon: <Lightbulb className="h-6 w-6" />
   },
 ]
@@ -39,7 +38,6 @@ export default function FeaturesSection() {
     <section className="py-20 md:py-32 bg-muted/30">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4">Features</Badge>
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             Everything you need for healthier sitting
           </h2>

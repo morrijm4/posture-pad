@@ -1,5 +1,5 @@
 import HeroSection from "@/components/homepage/HeroSection"
-// import BrandsSection from "@/components/homepage/BrandsSection"
+import WhatIsPosturePadSection from "@/components/homepage/WhatIsPosturePadSection"
 import ProcessSection from "@/components/homepage/ProcessSection"
 import FeaturesSection from "@/components/homepage/FeaturesSection"
 import ExamplesSection from "@/components/homepage/ExamplesSection"
@@ -14,7 +14,7 @@ export default async function Index() {
         <div className="flex min-h-screen flex-col">
             <div className="flex-1">
                 <HeroSection />
-                {/* <BrandsSection /> */}
+                <WhatIsPosturePadSection />
                 <ProcessSection />
                 <FeaturesSection />
                 <ExamplesSection />

@@ -4,6 +4,7 @@ import posthog from 'posthog-js';
 import { saveCustomer } from './saveCustomer';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
+import { ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -136,10 +137,11 @@ export default function Page() {
                             isLoading={isSubmitting}
                             disabled={isSubmitting}
                             variant="outline"
-                            className="w-full hover:cursor-pointer"
+                            className="group w-full hover:cursor-pointer"
                             type="submit"
                         >
-                            Join the early access list
+                            Join the list
+                            {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />}
                         </Button>
                     </form>
                     <p className="text-xs text-neutral-500">

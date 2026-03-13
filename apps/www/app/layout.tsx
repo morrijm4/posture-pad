@@ -24,7 +24,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className="min-h-screen flex flex-col bg-background">
                 <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false}>
                     <AnnouncementBar />

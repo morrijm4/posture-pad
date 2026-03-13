@@ -2,9 +2,8 @@
 
 import Link from "next/link"
 import type React from "react"
-import { Check } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 interface PricingFeature {
     icon: React.ReactNode
@@ -14,20 +13,16 @@ interface PricingFeature {
 
 interface PricingTier {
     title: string
-    price: string
     description: string
     features: string[]
     buttonText: string
-    popular?: boolean
-    bestValue?: boolean
 }
 
 export default function ModernPricing() {
     const tiers: PricingTier[] = [
         {
             title: "Early Backer",
-            price: "$179",
-            description: "Limited prelaunch pricing for PosturePad's first production run.",
+            description: "Limited prelaunch availability for PosturePad's first production run.",
             features: [
                 "Smart seat pad with embedded pressure sensors",
                 "Gentle ambient cues (haptics / lighting integrations)",
@@ -35,8 +30,6 @@ export default function ModernPricing() {
                 "Priority access to future app features and integrations",
             ],
             buttonText: "Reserve your spot",
-            // popular: true,
-            // bestValue: true,
         },
     ]
 
@@ -48,43 +41,9 @@ export default function ModernPricing() {
                     {tiers.map((tier, index) => (
                         <div
                             key={index}
-                            className={cn(
-                                "pricing-card",
-                                tier.popular && "pricing-card-popular"
-                            )}
+                            className="pricing-card"
                         >
-                            {tier.popular && (
-                                <div className="pricing-badge">
-                                    Most Popular
-                                </div>
-                            )}
-
-                            {tier.bestValue && (
-                                <div className="absolute -top-3 right-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white dark:bg-blue-500">
-                                    <span className="flex items-center gap-1">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="12"
-                                            height="12"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                        </svg>
-                                        Best Value
-                                    </span>
-                                </div>
-                            )}
-
                             <h3 className="text-xl font-bold">{tier.title}</h3>
-
-                            <div className="mt-4 flex items-baseline">
-                                <span className="text-5xl font-extrabold">{tier.price}</span>
-                            </div>
 
                             <p className="mt-4 text-sm text-muted-foreground">{tier.description}</p>
 
@@ -99,10 +58,11 @@ export default function ModernPricing() {
 
                             <Link href="/reserve" className="mt-8 block w-full" aria-label={`Select ${tier.title} plan`}>
                                 <Button
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground hover:cursor-pointer"
+                                    className="group w-full bg-primary hover:bg-primary/90 text-primary-foreground hover:cursor-pointer"
                                     aria-label={`Select ${tier.title} plan`}
                                 >
                                     {tier.buttonText}
+                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </Button>
                             </Link>
                         </div>
@@ -110,7 +70,7 @@ export default function ModernPricing() {
                 </div>
 
                 <p className="mt-4 text-center text-sm text-muted-foreground">
-                    No payment is collected today. Join the early backer list to signal demand and receive updates as we validate manufacturing costs, timelines, and integrations.
+                    No payment is collected today. Join the early backer list to signal demand and receive updates as we validate timelines and integrations.
                 </p>
             </div>
         </div>

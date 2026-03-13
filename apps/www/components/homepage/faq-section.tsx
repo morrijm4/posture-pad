@@ -76,7 +76,7 @@ export default function FAQSection() {
         {
             question: "How much will PosturePad cost?",
             answer:
-                "Our current target retail price is in the $169–$189 range, with an initial recommended launch price of $179 for direct-to-consumer sales. Actual pricing may adjust slightly as we finalize manufacturing costs, but early backers will receive our best available launch pricing.",
+                "Final pricing will depend on demonstrated interest and manufacturing costs, as prototyping and development are still ongoing. We will also conduct price polling in updates shared with the reservation list—so join to stay informed and shape the outcome.",
         },
     ]
 
