@@ -16,33 +16,8 @@ export default function ExamplesSection() {
                         Early visual explorations and prototypes that inform how PosturePad could live on real desks and in real work-from-home setups as we move toward launch.
                     </p>
                 </div>
-                <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-                    {Array.from({ length: 4 }, (_, i) => `/homepage/AI_Rendering_${i + 1}.png`).map((src, i) => (
-                        <div
-                            key={i}
-                            className="group relative overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
-                        >
-                            <div className="h-96 overflow-hidden">
-                                <div className="relative h-full w-full transition-all group-hover:scale-105">
-                                    <Image
-                                        src={src || "/placeholder.svg"}
-                                        alt="PosturePad concept render"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                    <div className="absolute bottom-2 right-2 rounded-full bg-primary/80 px-2 py-1 text-xs text-white">
-                                        <span className="flex items-center gap-1">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-white"></span>
-                                            Concept render
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-                    {Array.from({ length: 4 }, (_, i) => `/homepage/Perspective_${i + 1}.png`).map((src, i) => (
+                <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-3">
+                    {Array.from({ length: 3 }, (_, i) => `/homepage/AI_Rendering_${i + 2}.png`).map((src, i) => (
                         <div
                             key={i}
                             className="group relative overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
