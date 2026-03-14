@@ -13,9 +13,26 @@ export const viewport = {
     maximumScale: 1,
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+    || "http://localhost:3000";
+
 export const metadata = {
+    metadataBase: new URL(siteUrl),
     title: "PosturePad",
     description: "Enabling Postural Alignment With Ambient Devices",
+    openGraph: {
+        images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+        title: "PosturePad",
+        description: "Enabling Postural Alignment With Ambient Devices",
+        type: "website",
+    },
+    twitter: {
+        images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+        card: "summary_large_image",
+        title: "PosturePad",
+        description: "Enabling Postural Alignment With Ambient Devices",
+    },
 };
 
 export default function RootLayout({
