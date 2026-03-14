@@ -10,30 +10,23 @@ export default function ExamplesSection() {
                 <div className="flex flex-col items-center justify-center gap-4 text-center md:gap-8">
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Exploring the PosturePad experience</h2>
                     <p className="max-w-[700px] text-muted-foreground text-lg">
-                        Early visual mockups and digital renderings that inform how PosturePad could live in office and real work-from-home environments.
+                        Digital renderings showcasing PosturePad from different angles and perspectives.
                     </p>
                 </div>
-                <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-3">
-                    {Array.from({ length: 3 }, (_, i) => `/homepage/AI_Rendering_${i + 2}.png`).map((src, i) => (
+                <div className="mt-16 flex flex-col gap-4 sm:gap-6 md:gap-8">
+                    {Array.from({ length: 4 }, (_, i) => `/homepage/Rendering_${i + 1}.png`).map((src, i) => (
                         <div
                             key={i}
-                            className="group relative overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
+                            className="group relative w-full overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
                         >
-                            <div className="h-96 overflow-hidden">
-                                <div className="relative h-full w-full transition-all group-hover:scale-105">
-                                    <Image
-                                        src={src || "/placeholder.svg"}
-                                        alt="PosturePad concept render"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                    <div className="absolute bottom-2 right-2 rounded-full bg-primary/80 px-2 py-1 text-xs text-white">
-                                        <span className="flex items-center gap-1">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-white"></span>
-                                            Concept render
-                                        </span>
-                                    </div>
-                                </div>
+                            <div className="relative w-full transition-all group-hover:scale-105">
+                                <Image
+                                    src={src || "/placeholder.svg"}
+                                    alt="PosturePad product perspective"
+                                    width={1920}
+                                    height={1080}
+                                    className="w-full h-auto object-contain"
+                                />
                             </div>
                         </div>
                     ))}
