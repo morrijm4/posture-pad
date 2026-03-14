@@ -71,7 +71,7 @@ export default function FAQSection() {
         {
             question: "When will PosturePad be available to buy?",
             answer:
-                "We are currently in the development and validation phase, preparing for an initial production run supported by crowdfunding (e.g. Kickstarter) and pre-orders. By joining the early access list, you'll be the first to hear when timelines firm up and when pre-orders open.",
+                "We are currently in the development and validation phase, preparing for an initial production run. By joining the early access list, you'll be the first to hear when timelines firm up and when pre-orders open.",
         },
         {
             question: "How much will PosturePad cost?",
