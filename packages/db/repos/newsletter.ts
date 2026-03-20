@@ -2,6 +2,11 @@ import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { newsletterTable } from '../tables/newsletter';
 import postgres from 'postgres';
 
+interface GetOptions {
+    page?: number;
+    perPage?: number;
+};
+
 export class NewsletterRepository {
     db: PostgresJsDatabase;
     client: ReturnType<typeof postgres>
@@ -21,13 +26,13 @@ export class NewsletterRepository {
         await this.db.insert(newsletterTable).values(row);
     }
 
-    async get(page: number = 1, pageSize: number = 10) {
+    async get({ page = 1, perPage = 10 }: GetOptions = {}) {
         return this.db
             .select()
             .from(newsletterTable)
             .orderBy(newsletterTable.id)
-            .limit(pageSize)
-            .offset((page - 1) * pageSize)
+            .limit(perPage)
+            .offset((page - 1) * perPage)
     }
 
     async close() {

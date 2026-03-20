@@ -1,0 +1,29 @@
+services:
+  # The MQTT Broker
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./apps/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # Node.js App
+  mqtt-listener:
+    build: .
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    environment:
+      # Use the service name "mosquitto" as the hostname
+      - BROKER_URL=mqtt://mosquitto:1883
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=production
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/mqtt/dist/listener.js
+          target: /app/listener.js
+          initial_sync: true
