@@ -13,21 +13,18 @@ export default function ExamplesSection() {
                         Digital renderings showcasing PosturePad from different angles and perspectives.
                     </p>
                 </div>
-                <div className="mt-16 flex flex-col gap-4 sm:gap-6 md:gap-8">
+                <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {Array.from({ length: 4 }, (_, i) => `/homepage/Rendering_${i + 1}.png`).map((src, i) => (
                         <div
                             key={i}
-                            className="group relative w-full overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
+                            className="group relative aspect-[16/10] overflow-hidden rounded-lg border bg-background transition-all hover:shadow-lg"
                         >
-                            <div className="relative w-full transition-all group-hover:scale-105">
-                                <Image
-                                    src={src || "/placeholder.svg"}
-                                    alt="PosturePad product perspective"
-                                    width={1920}
-                                    height={1080}
-                                    className="w-full h-auto object-contain"
-                                />
-                            </div>
+                            <Image
+                                src={src || "/placeholder.svg"}
+                                alt="PosturePad product perspective"
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
                         </div>
                     ))}
                 </div>

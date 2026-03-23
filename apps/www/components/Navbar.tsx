@@ -11,6 +11,21 @@ export default async function Navbar() {
                 {/* <div className="flex items-center gap-4">
                     <ThemeToggle />
                 </div> */}
+
+                <nav className="flex flex-wrap gap-x-6 gap-y-1">
+                    <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        How It Works
+                    </Link>
+                    <Link href="#examples" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Examples
+                    </Link>
+                    <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Reserve
+                    </Link>
+                    <Link href="mailto:jmm845@cornell.edu" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Contact
+                    </Link>
+                </nav>
             </div>
         </header>
     );
