@@ -15,7 +15,7 @@ const testimonials = [
     },
     {
         quote: "As someone with lower back pain, I'm always mindful of how I'm sitting. I also work from home and spend a lot of time making my work space comfortable. I would love to add this product into my work-from-home setup.",
-        author: " Software engineer",
+        author: " Software Engineer",
         role: "New York, NY",
         // avatarUrl: "/homepage/example0003.png"
     }
