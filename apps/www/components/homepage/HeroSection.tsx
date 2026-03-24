@@ -5,7 +5,7 @@ import LoopRendering from "@/components/homepage/loop-rendering"
 
 export default function HeroSection() {
     return (
-        <section className="relative overflow-hidden pt-16 md:pt-24">
+        <section id="hero" className="relative overflow-hidden pt-16 md:pt-24">
             <div className="container px-4 md:px-6">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-6xl font-bold tracking-tighter sm:text-7xl md:text-8xl lg:text-9xl mb-6">

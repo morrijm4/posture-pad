@@ -8,6 +8,7 @@ import PricingSection from "@/components/homepage/PricingSection"
 import FAQSection from "@/components/homepage/FAQSection"
 import CTASection from "@/components/homepage/CTASection"
 import PosturePadArmy from "@/components/homepage/PosturePadArmy"
+import StickyMobileCTA from "@/components/homepage/sticky-mobile-cta"
 
 export default async function Index() {
     return (
@@ -24,6 +25,7 @@ export default async function Index() {
                 <PosturePadArmy />
                 <CTASection />
             </div>
+            <StickyMobileCTA />
         </div>
     )
 }
