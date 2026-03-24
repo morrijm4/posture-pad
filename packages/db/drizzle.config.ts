@@ -1,4 +1,4 @@
-import 'loadenv';
+import '@pp/loadenv';
 import { defineConfig } from 'drizzle-kit';
 
 const url = process.env.DATABASE_URL;

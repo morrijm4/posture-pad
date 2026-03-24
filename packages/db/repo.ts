@@ -1,13 +1,14 @@
 import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { newsletterTable } from '../tables/newsletter';
 import postgres from 'postgres';
+import { newsletterTable } from './tables/newsletter';
+import { postureTable } from "./tables/posture-data";
 
 interface GetOptions {
     page?: number;
     perPage?: number;
 };
 
-export class NewsletterRepository {
+export class Repository {
     db: PostgresJsDatabase;
     client: ReturnType<typeof postgres>
 
@@ -15,24 +16,28 @@ export class NewsletterRepository {
         const url = process.env.DATABASE_URL;
 
         if (typeof url !== 'string') {
-            throw new Error("DATABASE_URL not set for NewsletterRepository")
+            throw new Error("DATABASE_URL not set for Repository")
         }
 
         this.client = postgres(url, { prepare: false })
         this.db = drizzle({ client: this.client });
     }
 
-    async insert(row: typeof newsletterTable.$inferInsert) {
+    async insertNewsletterRecipient(row: typeof newsletterTable.$inferInsert) {
         await this.db.insert(newsletterTable).values(row);
     }
 
-    async get({ page = 1, perPage = 10 }: GetOptions = {}) {
+    async getNewsletterRecipient({ page = 1, perPage = 10 }: GetOptions = {}) {
         return this.db
             .select()
             .from(newsletterTable)
             .orderBy(newsletterTable.id)
             .limit(perPage)
             .offset((page - 1) * perPage)
+    }
+
+    async insertPosture(row: typeof postureTable.$inferInsert) {
+        await this.db.insert(postureTable).values(row);
     }
 
     async close() {

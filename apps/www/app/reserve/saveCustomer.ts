@@ -2,7 +2,7 @@
 
 import { PostHog } from 'posthog-node';
 import { encrypt } from '@/lib/encrypt';
-import { NewsletterRepository } from '@pp/db/repos/newsletter';
+import { Repository } from '@pp/db/repo';
 import { loadenv } from '@pp/loadenv/api';
 
 interface SaveCustomerInput {
@@ -57,7 +57,7 @@ async function savePostHog({ distinctId, sessionId, name, email }: SaveCustomerI
 }
 
 async function saveDb(name: string, email: string) {
-    const repo = new NewsletterRepository()
-    await repo.insert({ name, email })
+    const repo = new Repository()
+    await repo.insertNewsletterRecipient({ name, email })
     await repo.close()
 }
