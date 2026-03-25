@@ -7,7 +7,7 @@
     "scripts": {
         "build": "docker compose --env-file ./.env.local build",
         "dev": "concurrently -k -n \"docker,esbuild\" -c \"cyan,green\" \"docker compose --env-file ./.env.local up --build --watch\" \"pnpm -F @pp/mqtt dev\"",
-        "deploy": "docker save posture-pad-mqtt-listener:latest | ssh lonos \"docker load\" && scp docker-compose.yml apps/mqtt/mosquitto.conf lonos:/home/mm/test && scp .env.local lonos:/home/mm/app/.env"
+        "deploy": "bash deploy.sh"
     },
     "peerDependencies": {
         "typescript": "^5"

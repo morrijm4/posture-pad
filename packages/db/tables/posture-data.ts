@@ -1,4 +1,4 @@
-import { pgTable, integer, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, varchar, timestamp, index } from "drizzle-orm/pg-core";
 
 export const postureTable = pgTable("posture", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -16,4 +16,6 @@ export const postureTable = pgTable("posture", {
     gpio35: integer(),
     gpio36: integer(),
     gpio39: integer(),
-})
+}, (table) => [
+    index("device_id_created_at_idx").on(table.deviceId, table.createdAt),
+])

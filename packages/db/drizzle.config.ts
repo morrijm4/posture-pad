@@ -1,10 +1,10 @@
 import '@pp/loadenv';
 import { defineConfig } from 'drizzle-kit';
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_DIRECT_URL;
 
 if (typeof url !== 'string') {
-    throw new Error("DATABASE_URL environment variable not set");
+    throw new Error("DATABASE_DIRECT_URL environment variable not set");
 }
 
 export default defineConfig({

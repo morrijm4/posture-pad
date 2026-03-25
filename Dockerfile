@@ -9,4 +9,5 @@ RUN pnpm -F @pp/mqtt build
 
 FROM base
 COPY --from=build /app/apps/mqtt/dist/listener.js .
+COPY --from=build /app/apps/mqtt/keys/ca.crt .
 ENTRYPOINT ["node", "./listener.js"]

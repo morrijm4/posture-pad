@@ -10,7 +10,8 @@
     "scripts": {
         "build": "node ./esbuild.config.js build",
         "dev": "concurrently -n \"listener,broker\" -c \"cyan,green\" \"node ./esbuild.config.js watch\"",
-        "start": "node ./esbuild.config.js watch"
+        "start": "node ./esbuild.config.js watch",
+        "keygen": "bash keygen.sh"
     },
     "dependencies": {
         "@pp/db": "workspace:*",
