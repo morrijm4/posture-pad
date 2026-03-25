@@ -29,11 +29,6 @@ const PAD_LAYOUT: GpioKey[][] = [
     ["gpio36", "gpio39"],
 ];
 
-const PIN_LABELS: Record<GpioKey, string> = {
-    gpio14: "14", gpio25: "25", gpio26: "26", gpio27: "27", gpio32: "32",
-    gpio33: "33", gpio34: "34", gpio35: "35", gpio36: "36", gpio39: "39",
-};
-
 const POLL_INTERVAL_MS = 2000;
 
 function valueToColor(normalized: number): string {
@@ -82,7 +77,7 @@ export function LiveHeatMap() {
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const STALE_THRESHOLD_MS = 10_000;
-    
+
     const isLive =
         reading != null &&
         reading.label !== "no_seated" &&
