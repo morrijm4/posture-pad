@@ -81,7 +81,12 @@ export function LiveHeatMap() {
     const [loading, setLoading] = useState(true);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const isLive = reading != null && reading.label !== "no_seated";
+    const STALE_THRESHOLD_MS = 10_000;
+    
+    const isLive =
+        reading != null &&
+        reading.label !== "no_seated" &&
+        Date.now() - new Date(reading.createdAt).getTime() < STALE_THRESHOLD_MS;
 
     // Load device list on mount
     useEffect(() => {
@@ -224,12 +229,6 @@ export function LiveHeatMap() {
                                                     backgroundColor: bg ?? "hsl(var(--muted))",
                                                 }}
                                             >
-                                                {/* <span className="text-[10px] font-medium opacity-70 text-white drop-shadow-sm">
-                                                    GPIO {PIN_LABELS[pin]}
-                                                </span>
-                                                <span className="text-lg font-bold text-white drop-shadow-sm">
-                                                    {raw ?? "—"}
-                                                </span> */}
                                             </div>
                                         );
                                     })}
