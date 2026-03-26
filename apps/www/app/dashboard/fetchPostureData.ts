@@ -33,3 +33,12 @@ export async function fetchLatestReading(deviceId: string) {
         await repo.close();
     }
 }
+
+export async function fetchPostureLabelCounts(deviceId?: string) {
+    const repo = new Repository();
+    try {
+        return await repo.getPostureLabelCounts(deviceId);
+    } finally {
+        await repo.close();
+    }
+}

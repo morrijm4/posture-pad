@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Activity, Cpu, Clock, Hash } from "lucide-react";
 import { LiveHeatMap } from "./heat-map";
+import { PosturePieChart } from "./pie-chat";
 
 const GPIO_PINS = ["gpio14", "gpio25", "gpio26", "gpio27", "gpio32", "gpio33", "gpio34", "gpio35", "gpio36", "gpio39"] as const;
 type GpioKey = typeof GPIO_PINS[number];
@@ -88,6 +89,9 @@ export default function DashboardPage() {
 
             {/* Live Heat Map */}
             <LiveHeatMap />
+
+            {/* Pie Chart */}
+            <PosturePieChart />
 
             {/* Data Table */}
             <Card>

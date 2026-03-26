@@ -1,6 +1,6 @@
 import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from 'postgres';
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { newsletterTable } from './tables/newsletter';
 import { postureTable } from "./tables/posture-data";
 
@@ -73,5 +73,23 @@ export class Repository {
             .orderBy(desc(postureTable.id))
             .limit(1);
         return rows[0] ?? null;
+    }
+
+    async getPostureLabelCounts(deviceId?: string) {
+        const countExpr = sql<number>`count(*)`;
+        const query = this.db
+            .select({
+                label: postureTable.label,
+                count: countExpr,
+            })
+            .from(postureTable)
+            .groupBy(postureTable.label)
+            .orderBy(desc(countExpr));
+
+        if (deviceId) {
+            return query.where(eq(postureTable.deviceId, deviceId));
+        }
+
+        return query;
     }
 }
