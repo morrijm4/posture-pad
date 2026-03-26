@@ -64,6 +64,10 @@ function postureLabel(label: string): string {
             return 'Good';
         case 'no_seated':
             return 'Not Seated'
+        case 'left':
+            return 'Leaning Left'
+        case 'right':
+            return 'Leaning Right'
         default:
             return label;
     }
@@ -100,14 +104,10 @@ export function LiveHeatMap() {
                 if (row) setReading(row as PostureRow);
             });
         };
-
-        // Always fetch once so we know the current state
+        
         poll();
-
-        // Only keep polling while seated
-        if (isLive) {
-            intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
-        }
+        const interval = isLive ? POLL_INTERVAL_MS : POLL_INTERVAL_MS * 5;
+        intervalRef.current = setInterval(poll, interval);
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
@@ -207,28 +207,45 @@ export function LiveHeatMap() {
                 {!reading ? (
                     <Skeleton className="h-[340px] w-full" />
                 ) : (
-                    <div className="flex flex-col items-center gap-6">
-                        {/* Heat map grid */}
-                        <div className="flex flex-col gap-2">
-                            {PAD_LAYOUT.map((pinsInRow, ri) => (
-                                <div key={ri} className="flex gap-2 justify-center">
-                                    {pinsInRow.map((pin) => {
-                                        const raw = reading[pin];
-                                        const norm = normalize(raw);
-                                        const bg = norm != null ? valueToColor(norm) : undefined;
-                                        return (
-                                            <div
-                                                key={pin}
-                                                className="relative w-24 h-20 rounded-xl flex flex-col items-center justify-center transition-colors duration-500"
-                                                style={{
-                                                    backgroundColor: bg ?? "hsl(var(--muted))",
-                                                }}
-                                            >
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ))}
+                    <div
+                        className="relative flex flex-col items-center gap-6 rounded-2xl overflow-hidden isolate"
+                        style={{ padding: "8rem", width: "fit-content", margin: "0 auto" }}>
+                        <div
+                            className="absolute inset-0 bg-cover bg-center bg-no-repeat -scale-y-100 -z-0"
+                            style={{ backgroundImage: "url('/Top_Drawing.png')" }}
+                        />
+                        <div className="relative rounded-2xl overflow-hidden">
+                            <div className="flex flex-col gap-2 relative z-10">
+                                {PAD_LAYOUT.map((pinsInRow, ri) => {
+                                    // Curve outward in the middle: row 0 and 4 are narrow, row 2 is widest
+                                    const gaps = [15, 25, 30, 25, 15];
+                                    const gap = gaps[ri] ?? 0.5;
+                                    return (
+                                        <div
+                                            key={ri}
+                                            className="flex justify-center"
+                                            style={{ gap: `${gap}rem` }}
+                                        >
+                                            {pinsInRow.map((pin) => {
+                                                const raw = reading[pin];
+                                                const norm = normalize(raw);
+                                                const color = norm != null ? valueToColor(norm) : "hsl(var(--muted) / 0.3)";
+                                                return (
+                                                    <div
+                                                        key={pin}
+                                                        className="relative w-28 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-700"
+                                                        style={{
+                                                            background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+                                                            filter: "blur(6px)",
+                                                        }}
+                                                    >
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Legend */}
