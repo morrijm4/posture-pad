@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import mqtt, { type MqttClient } from "mqtt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchDeviceIds, fetchLatestReading } from "./fetchPostureData";
 
@@ -68,7 +71,10 @@ const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
     ],
 };
 
-const POLL_INTERVAL_MS = 2000;
+const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
+const MQTT_USERNAME = process.env.NEXT_PUBLIC_MQTT_USERNAME;
+const MQTT_TOPIC_TEMPLATE = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPLATE ?? "devices/{deviceId}/posture";
+const STALE_THRESHOLD_MS = 10_000;
 
 function valueToColor(normalized: number): string {
     const clamped = Math.max(0, Math.min(1, normalized));
@@ -116,15 +122,79 @@ function postureLabel(label: string | null): string {
     }
 }
 
+function topicForDevice(deviceId: string): string {
+    return MQTT_TOPIC_TEMPLATE.replace("{deviceId}", deviceId);
+}
+
+function parseJsonMessage(buf: Uint8Array): Record<string, unknown> | null {
+    try {
+        return JSON.parse(new TextDecoder().decode(buf)) as Record<string, unknown>;
+    } catch {
+        return null;
+    }
+}
+
+function asObject(value: unknown): Record<string, unknown> | null {
+    if (value != null && typeof value === "object" && !Array.isArray(value)) {
+        return value as Record<string, unknown>;
+    }
+    return null;
+}
+
+function asNumber(value: unknown): number | null {
+    return typeof value === "number" ? value : null;
+}
+
+function asString(value: unknown): string | null {
+    return typeof value === "string" ? value : null;
+}
+
+function buildLiveReadingUpdate(
+    message: Record<string, unknown>,
+    deviceId: string,
+    previous: PostureRow | null,
+): PostureRow {
+    const sensors = asObject(message.sensors);
+    const next: PostureRow = {
+        id: previous?.id ?? 0,
+        deviceId,
+        deviceTimestamp: asNumber(message.timestamp) ?? previous?.deviceTimestamp ?? null,
+        createdAt: new Date(),
+        label: asString(message.posture) ?? previous?.label ?? null,
+        gpio14: previous?.gpio14 ?? null,
+        gpio25: previous?.gpio25 ?? null,
+        gpio26: previous?.gpio26 ?? null,
+        gpio27: previous?.gpio27 ?? null,
+        gpio32: previous?.gpio32 ?? null,
+        gpio33: previous?.gpio33 ?? null,
+        gpio34: previous?.gpio34 ?? null,
+        gpio35: previous?.gpio35 ?? null,
+        gpio36: previous?.gpio36 ?? null,
+        gpio39: previous?.gpio39 ?? null,
+    };
+
+    for (const pin of GPIO_PINS) {
+        const mqttKey = pin.toUpperCase();
+        const nextValue = asNumber(sensors?.[mqttKey]);
+        if (nextValue != null) {
+            next[pin] = nextValue;
+        }
+    }
+
+    return next;
+}
+
 export function LiveHeatMap() {
     const [devices, setDevices] = useState<string[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
     const [reading, setReading] = useState<PostureRow | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const STALE_THRESHOLD_MS = 10_000;
+    const [mqttPassword, setMqttPassword] = useState("");
+    const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+    const mqttClientRef = useRef<MqttClient | null>(null);
+    const activeTopicRef = useRef<string | null>(null);
 
     const isLive =
         reading != null &&
@@ -140,23 +210,127 @@ export function LiveHeatMap() {
         });
     }, []);
 
-    useEffect(() => {
-        if (!selectedDevice) return;
+    const refreshLatestReading = async (deviceId: string, opts?: { quiet?: boolean }) => {
+        if (!opts?.quiet) {
+            setRefreshing(true);
+        }
 
-        const poll = () => {
-            fetchLatestReading(selectedDevice).then((row) => {
-                if (row) setReading(row as PostureRow);
-            });
+        try {
+            const row = await fetchLatestReading(deviceId);
+            if (row) {
+                setReading(row as PostureRow);
+            }
+        } finally {
+            if (!opts?.quiet) {
+                setRefreshing(false);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (!selectedDevice) {
+            if (activeTopicRef.current && mqttClientRef.current) {
+                mqttClientRef.current.unsubscribe(activeTopicRef.current);
+                activeTopicRef.current = null;
+            }
+            return;
+        }
+
+        let cancelled = false;
+
+        const hydrateLatestReading = async () => {
+            if (!cancelled) {
+                await refreshLatestReading(selectedDevice, { quiet: true });
+            }
         };
-        
-        poll();
-        const interval = isLive ? POLL_INTERVAL_MS : POLL_INTERVAL_MS * 5;
-        intervalRef.current = setInterval(poll, interval);
+
+        void hydrateLatestReading();
 
         return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
+            cancelled = true;
         };
-    }, [selectedDevice, isLive]);
+    }, [selectedDevice]);
+
+    useEffect(() => {
+        if (!realtimeEnabled) {
+            mqttClientRef.current?.end(true);
+            mqttClientRef.current = null;
+            activeTopicRef.current = null;
+            return;
+        }
+
+        if (!selectedDevice) {
+            if (activeTopicRef.current && mqttClientRef.current) {
+                mqttClientRef.current.unsubscribe(activeTopicRef.current);
+                activeTopicRef.current = null;
+            }
+            return;
+        }
+
+        const topic = topicForDevice(selectedDevice);
+
+        if (!MQTT_WS_URL) {
+            return;
+        }
+
+        const client =
+            mqttClientRef.current ??
+            mqtt.connect(MQTT_WS_URL, {
+                username: MQTT_USERNAME,
+                password: mqttPassword,
+                reconnectPeriod: 5_000,
+            });
+        mqttClientRef.current = client;
+
+        const subscribeToTopic = () => {
+            if (activeTopicRef.current && activeTopicRef.current !== topic) {
+                client.unsubscribe(activeTopicRef.current);
+            }
+            activeTopicRef.current = topic;
+            client.subscribe(topic);
+        };
+
+        const handleConnect = () => {
+            subscribeToTopic();
+        };
+
+        const handleMessage = (messageTopic: string, payload: Uint8Array) => {
+            if (messageTopic !== topic) return;
+
+            const message = parseJsonMessage(payload);
+            if (message == null) return;
+
+            setReading((previous) => buildLiveReadingUpdate(message, selectedDevice, previous));
+        };
+
+        client.on("connect", handleConnect);
+        client.on("reconnect", subscribeToTopic);
+        client.on("message", handleMessage);
+
+        if (client.connected) {
+            handleConnect();
+        } else {
+            subscribeToTopic();
+        }
+
+        return () => {
+            client.off("connect", handleConnect);
+            client.off("reconnect", subscribeToTopic);
+            client.off("message", handleMessage);
+            if (activeTopicRef.current === topic) {
+                client.unsubscribe(topic);
+                activeTopicRef.current = null;
+            }
+        };
+    }, [mqttPassword, realtimeEnabled, selectedDevice]);
+
+    useEffect(() => {
+        return () => {
+            mqttClientRef.current?.end(true);
+            mqttClientRef.current = null;
+            activeTopicRef.current = null;
+        };
+    }, []);
 
     useEffect(() => {
         const updateViewportSize = () => {
@@ -226,20 +400,18 @@ export function LiveHeatMap() {
                         {reading && (
                             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                 <span
-                                    className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                                        isLive
-                                            ? "bg-green-500/15 text-green-600 dark:text-green-400"
-                                            : "bg-muted text-muted-foreground"
-                                    }`}
+                                    className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${isLive
+                                        ? "bg-green-500/15 text-green-600 dark:text-green-400"
+                                        : "bg-muted text-muted-foreground"
+                                        }`}
                                 >
                                     <span
-                                        className={`inline-block h-2 w-2 rounded-full ${
-                                            isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
-                                        }`}
+                                        className={`inline-block h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
+                                            }`}
                                     />
                                     {isLive ? "Live" : "Not Seated"}
                                 </span>
-                                <span>Reading #{reading.id}</span>
+                                {reading.id > 0 && <span>Reading #{reading.id}</span>}
                                 {reading.label && (
                                     <Badge variant="secondary">
                                         {postureLabel(reading.label)}
@@ -249,7 +421,20 @@ export function LiveHeatMap() {
                             </div>
                         )}
                     </div>
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+                    <form
+                        className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
+                        autoComplete="on"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!realtimeEnabled && MQTT_WS_URL && mqttPassword.trim().length > 0) {
+                                setRealtimeEnabled(true);
+                                return;
+                            }
+                            if (realtimeEnabled) {
+                                setRealtimeEnabled(false);
+                            }
+                        }}
+                    >
                         {/* Device selector */}
                         <select
                             className="w-full min-w-0 max-w-full rounded border bg-background px-2 py-1 text-sm sm:w-[22rem] sm:max-w-[22rem]"
@@ -263,7 +448,37 @@ export function LiveHeatMap() {
                                 <option key={id} value={id}>{id}</option>
                             ))}
                         </select>
-                    </div>
+                        <Input
+                            type="password"
+                            name="password"
+                            placeholder="MQTT password"
+                            autoComplete="current-password"
+                            className="w-full sm:w-48"
+                            value={mqttPassword}
+                            onChange={(e) => setMqttPassword(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            variant={realtimeEnabled ? "secondary" : "default"}
+                            className="w-full sm:w-auto"
+                            disabled={!realtimeEnabled && (!MQTT_WS_URL || mqttPassword.trim().length === 0)}
+                        >
+                            {realtimeEnabled ? "Disable Realtime" : "Enable Realtime"}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            isLoading={refreshing}
+                            disabled={!selectedDevice}
+                            onClick={() => {
+                                if (!selectedDevice) return;
+                                void refreshLatestReading(selectedDevice);
+                            }}
+                        >
+                            Refresh
+                        </Button>
+                    </form>
                 </div>
             </CardHeader>
             <CardContent>
