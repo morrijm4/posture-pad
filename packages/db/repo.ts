@@ -1,5 +1,6 @@
 import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from 'postgres';
+import { desc, eq } from "drizzle-orm";
 import { newsletterTable } from './tables/newsletter';
 import { postureTable } from "./tables/posture-data";
 
@@ -46,5 +47,31 @@ export class Repository {
 
     async [Symbol.asyncDispose]() {
         await this.close();
+    }
+
+    async getPostureData({ page = 1, perPage = 10 }: GetOptions = {}) {
+        return this.db
+            .select()
+            .from(postureTable)
+            .orderBy(desc(postureTable.id))
+            .limit(perPage)
+            .offset((page - 1) * perPage)
+    }
+
+    async getDeviceIds() {
+        const rows = await this.db
+            .selectDistinct({ deviceId: postureTable.deviceId })
+            .from(postureTable);
+        return rows.map((r) => r.deviceId).filter((id): id is string => id != null);
+    }
+
+    async getLatestReading(deviceId: string) {
+        const rows = await this.db
+            .select()
+            .from(postureTable)
+            .where(eq(postureTable.deviceId, deviceId))
+            .orderBy(desc(postureTable.id))
+            .limit(1);
+        return rows[0] ?? null;
     }
 }
