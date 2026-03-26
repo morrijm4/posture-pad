@@ -5,11 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const GPIO_PINS = [
-    // "gpio14", 
-    // "gpio25", 
-    // "gpio26", 
-    // "gpio27",
+export const GPIO_PINS = [
     "gpio32",
     "gpio33",
     "gpio34",
@@ -17,7 +13,7 @@ const GPIO_PINS = [
     "gpio36",
     "gpio39"
 ] as const;
-type GpioKey = (typeof GPIO_PINS)[number];
+export type GpioKey = (typeof GPIO_PINS)[number];
 
 export type PostureRow = {
     id: number;

@@ -17,11 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Activity, Cpu, Clock, Hash } from "lucide-react";
-import { LiveHeatMap, type PostureRow } from "./heat-map";
+import { LiveHeatMap, GPIO_PINS, type PostureRow, type GpioKey } from "./heat-map";
 import { PosturePieChart, type LabelCountRow } from "./pie-chat";
 
-const GPIO_PINS = ["gpio14", "gpio25", "gpio26", "gpio27", "gpio32", "gpio33", "gpio34", "gpio35", "gpio36", "gpio39"] as const;
-type GpioKey = typeof GPIO_PINS[number];
 
 const PER_PAGE = 25;
 const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
@@ -88,10 +86,6 @@ function buildLiveReadingUpdate(
         deviceTimestamp: asNumber(message.timestamp) ?? previous?.deviceTimestamp ?? null,
         createdAt: new Date(),
         label: asString(message.posture) ?? previous?.label ?? null,
-        gpio14: previous?.gpio14 ?? null,
-        gpio25: previous?.gpio25 ?? null,
-        gpio26: previous?.gpio26 ?? null,
-        gpio27: previous?.gpio27 ?? null,
         gpio32: previous?.gpio32 ?? null,
         gpio33: previous?.gpio33 ?? null,
         gpio34: previous?.gpio34 ?? null,
