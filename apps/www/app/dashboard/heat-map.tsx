@@ -6,7 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchDeviceIds, fetchLatestReading } from "./fetchPostureData";
 
-const GPIO_PINS = ["gpio14", "gpio25", "gpio26", "gpio27", "gpio32", "gpio33", "gpio34", "gpio35", "gpio36", "gpio39"] as const;
+const GPIO_PINS = [
+    // "gpio14", 
+    // "gpio25", 
+    // "gpio26", 
+    // "gpio27",
+    "gpio32",
+    "gpio33",
+    "gpio34",
+    "gpio35",
+    "gpio36",
+    "gpio39"
+] as const;
 type GpioKey = (typeof GPIO_PINS)[number];
 
 type PostureRow = {
@@ -31,40 +42,28 @@ type ViewportSize = "mobile" | "tablet" | "desktop";
  */
 const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
     mobile: [
-        { pin: "gpio14", top: "35%", left: "41%" },
-        { pin: "gpio25", top: "35%", left: "59%" },
-        { pin: "gpio26", top: "49%", left: "38%" },
-        { pin: "gpio27", top: "49%", left: "62%" },
-        { pin: "gpio32", top: "58%", left: "34%" },
-        { pin: "gpio33", top: "58%", left: "66%" },
+        { pin: "gpio32", top: "58%", left: "39%" },
+        { pin: "gpio33", top: "58%", left: "61%" },
         { pin: "gpio34", top: "65%", left: "38%" },
         { pin: "gpio35", top: "65%", left: "62%" },
-        { pin: "gpio36", top: "65%", left: "46%" },
-        { pin: "gpio39", top: "65%", left: "54%" },
+        { pin: "gpio36", top: "72%", left: "46%" },
+        { pin: "gpio39", top: "72%", left: "54%" },
     ],
     tablet: [
-        { pin: "gpio14", top: "35%", left: "40%" },
-        { pin: "gpio25", top: "35%", left: "60%" },
-        { pin: "gpio26", top: "50%", left: "37%" },
-        { pin: "gpio27", top: "50%", left: "63%" },
-        { pin: "gpio32", top: "59%", left: "33%" },
-        { pin: "gpio33", top: "59%", left: "67%" },
+        { pin: "gpio32", top: "55%", left: "38%" },
+        { pin: "gpio33", top: "55%", left: "62%" },
         { pin: "gpio34", top: "66%", left: "37%" },
         { pin: "gpio35", top: "66%", left: "63%" },
-        { pin: "gpio36", top: "66%", left: "46%" },
-        { pin: "gpio39", top: "66%", left: "54%" },
+        { pin: "gpio36", top: "75%", left: "46%" },
+        { pin: "gpio39", top: "75%", left: "54%" },
     ],
     desktop: [
-        { pin: "gpio14", top: "35%", left: "38%" },
-        { pin: "gpio25", top: "35%", left: "62%" },
-        { pin: "gpio26", top: "50%", left: "35%" },
-        { pin: "gpio27", top: "50%", left: "65%" },
-        { pin: "gpio32", top: "59%", left: "30%" },
-        { pin: "gpio33", top: "59%", left: "70%" },
+        { pin: "gpio32", top: "55%", left: "35%" },
+        { pin: "gpio33", top: "55%", left: "65%" },
         { pin: "gpio34", top: "66%", left: "35%" },
         { pin: "gpio35", top: "66%", left: "65%" },
-        { pin: "gpio36", top: "66%", left: "45%" },
-        { pin: "gpio39", top: "66%", left: "55%" },
+        { pin: "gpio36", top: "75%", left: "45%" },
+        { pin: "gpio39", top: "75%", left: "55%" },
     ],
 };
 
