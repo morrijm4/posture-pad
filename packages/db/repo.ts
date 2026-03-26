@@ -7,6 +7,7 @@ import { postureTable } from "./tables/posture-data";
 interface GetOptions {
     page?: number;
     perPage?: number;
+    deviceId?: string;
 };
 
 export class Repository {
@@ -49,10 +50,18 @@ export class Repository {
         await this.close();
     }
 
-    async getPostureData({ page = 1, perPage = 10 }: GetOptions = {}) {
-        return this.db
-            .select()
-            .from(postureTable)
+    async getPostureData({ page = 1, perPage = 10, deviceId }: GetOptions = {}) {
+        const baseQuery = this.db.select().from(postureTable);
+
+        if (typeof deviceId === "string") {
+            return baseQuery
+                .where(eq(postureTable.deviceId, deviceId))
+                .orderBy(desc(postureTable.id))
+                .limit(perPage)
+                .offset((page - 1) * perPage);
+        }
+
+        return baseQuery
             .orderBy(desc(postureTable.id))
             .limit(perPage)
             .offset((page - 1) * perPage)
