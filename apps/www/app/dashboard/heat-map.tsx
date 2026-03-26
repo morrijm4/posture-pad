@@ -95,20 +95,22 @@ function valueToColor(normalized: number): string {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function postureLabel(label: string): string {
+function postureLabel(label: string | null): string {
     switch (label) {
-        case 'mega_slouching':
-            return 'Mega Slouching';
-        case 'good':
-            return 'Good';
-        case 'no_seated':
-            return 'Not Seated'
-        case 'left':
-            return 'Leaning Left'
-        case 'right':
-            return 'Leaning Right'
-        case 'slouching':
-            return 'Slouching'
+        case "mega_slouching":
+            return "Mega Slouching";
+        case "slouching":
+            return "Slouching";
+        case "good":
+            return "Good";
+        case "no_seated":
+            return "Not Seated";
+        case "leaning_left":
+            return "Leaning Left";
+        case "leaning_right":
+            return "Leaning Right";
+        case null:
+            return "Unlabeled";
         default:
             return label;
     }

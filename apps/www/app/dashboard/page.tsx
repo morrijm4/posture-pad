@@ -49,6 +49,27 @@ export default function DashboardPage() {
         : "—";
     const uniqueLabels = new Set(data.map((r) => r.label).filter(Boolean)).size;
 
+    function postureLabel(label: string | null): string {
+        switch (label) {
+            case "mega_slouching":
+                return "Mega Slouching";
+            case "slouching":
+                return "Slouching";
+            case "good":
+                return "Good";
+            case "no_seated":
+                return "Not Seated";
+            case "leaning_left":
+                return "Leaning Left";
+            case "leaning_right":
+                return "Leaning Right";
+            case null:
+                return "Unlabeled";
+            default:
+                return label;
+        }
+    }
+
     return (
         <div className="container mx-auto py-8 px-4 space-y-8">
             <div>
@@ -157,7 +178,7 @@ export default function DashboardPage() {
                                             </TableCell>
                                             <TableCell>
                                                 {row.label ? (
-                                                    <Badge variant="secondary">{row.label}</Badge>
+                                                    <Badge variant="secondary">{postureLabel(row.label)}</Badge>
                                                 ) : (
                                                     <span className="text-muted-foreground">—</span>
                                                 )}
