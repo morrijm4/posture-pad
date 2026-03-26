@@ -1,21 +1,16 @@
-import fs from 'fs';
 import mqtt from 'mqtt';
 import { Repository } from '@pp/db/repo';
 
 async function main() {
-    const url = process.env.BROKER_URL;
     const pwd = process.env.MQTT_PWD;
 
-    if (typeof url !== 'string')
-        throw new Error("BROKER_URL not set!");
     if (typeof pwd !== 'string')
         throw new Error("MQTT_PWD not set!");
 
     const repo = new Repository();
-    const client = mqtt.connect(url, {
+    const client = mqtt.connect("mqtts://pp.mattymo.dev", {
         username: 'mqtt-listener',
         password: pwd,
-        ca: fs.readFileSync('ca.crt'),
         port: 8883,
         rejectUnauthorized: true,
     });
@@ -23,7 +18,7 @@ async function main() {
     // client.subscribe("devices/+/posture");
     client.subscribe("#");
 
-    client.on("connect", () => console.log("Connected to broker"));
+    client.on("connect", () => console.log("Connected to broker. Swag!"));
     client.on("error", (error) => console.error("Error connecting: ", error))
 
     client.on("message", async (topic, buf) => {

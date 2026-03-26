@@ -1,10 +1,9 @@
-docker save posture-pad-mqtt-listener:latest | ssh lonos "docker load"
+WORKDIR=/home/mm/app
 
-scp apps/mqtt/docker-compose.production.yml lonos:/home/mm/app/docker-compose.yml
-scp apps/mqtt/mosquitto.conf lonos:/home/mm/app/mosquitto.conf
-scp .env.local lonos:/home/mm/app/.env
-scp apps/mqtt/keys/server.key apps/mqtt/keys/server.crt lonos:/home/mm/app/certs
-scp apps/mqtt/passwd lonos:/home/mm/app/passwd
+ssh lonos "mkdir -p $WORKDIR/apps/mqtt"
 
-ssh lonos "chmod 644 /home/mm/app/passwd"
-ssh lonos "chmod 644 /home/mm/app/certs/server.key"
+scp .env.local docker-compose.yml lonos:$WORKDIR
+scp apps/mqtt/passwd apps/mqtt/mosquitto.conf lonos:$WORKDIR/apps/mqtt
+scp apps/mqtt/certbot-renew-hook.sh lonos:/etc/letsencrypt/renewal-hooks/deploy/mosquitto-copy.sh
+
+ssh lonos "chmod 644 $WORKDIR/apps/mqtt/passwd"

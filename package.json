@@ -5,9 +5,12 @@
     "private": true,
     "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be",
     "scripts": {
-        "build": "docker compose --env-file ./.env.local build",
-        "dev": "concurrently -k -n \"docker,esbuild\" -c \"cyan,green\" \"docker compose --env-file ./.env.local up --build --watch\" \"pnpm -F @pp/mqtt dev\"",
-        "deploy": "bash deploy.sh"
+        "build": "docker build -t posture-pad-mqtt-listener:latest .",
+        "dev": "concurrently -k -n \"docker,esbuild\" -c \"cyan,green\" \"docker compose --env-file ./.env.local up --watch\" \"pnpm -F @pp/mqtt dev\"",
+        "deploy": "pnpm build && pnpm deploy:image && pnpm deploy:config && pnpm deploy:restart",
+        "deploy:config": "bash deploy.sh",
+        "deploy:image": "docker save posture-pad-mqtt-listener:latest | ssh lonos \"docker load\"",
+        "deploy:restart": "ssh lonos \"cd app && docker compose up -d\""
     },
     "peerDependencies": {
         "typescript": "^5"

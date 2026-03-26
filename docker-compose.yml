@@ -1,5 +1,4 @@
 services:
-  # The MQTT Broker
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
@@ -10,23 +9,42 @@ services:
       - ./apps/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./apps/mqtt/keys:/mosquitto/certs
       - ./apps/mqtt/passwd:/mosquitto/passwd
+      - /etc/letsencrypt/archive/pp.mattymo.dev:/etc/letsencrypt/archive/pp.mattymo.dev:ro
 
-  # Node.js App
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      mqttnet:
+        aliases:
+          - pp.mattymo.dev
+
   mqtt-listener:
-    build: .
+    image: posture-pad-mqtt-listener:latest
+    container_name: mqtt-listener
     init: true
     restart: unless-stopped
     depends_on:
       - mosquitto
     environment:
-      # Use the service name "mosquitto" as the hostname
-      - BROKER_URL=mqtts://mosquitto:8883
       - DATABASE_URL=${DATABASE_URL}
       - MQTT_PWD=${MQTT_PWD}
       - NODE_ENV=production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mqttnet
     develop:
       watch:
         - action: sync+restart
           path: ./apps/mqtt/dist/listener.js
           target: /app/listener.js
           initial_sync: true
+
+networks:
+  mqttnet:
