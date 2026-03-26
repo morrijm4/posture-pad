@@ -7,10 +7,10 @@ if (process.env.NODE_ENV === 'development') {
     loadenv();
 }
 
-export async function fetchPostureData(page: number = 1, perPage: number = 25) {
+export async function fetchPostureData(page: number = 1, perPage: number = 25, deviceId?: string) {
     const repo = new Repository();
     try {
-        return await repo.getPostureData({ page, perPage });
+        return await repo.getPostureData({ page, perPage, deviceId });
     } finally {
         await repo.close();
     }

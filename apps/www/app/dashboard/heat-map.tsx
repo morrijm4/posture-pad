@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchDeviceIds, fetchLatestReading } from "./fetchPostureData";
 
 const GPIO_PINS = [
     // "gpio14", 
@@ -20,7 +19,7 @@ const GPIO_PINS = [
 ] as const;
 type GpioKey = (typeof GPIO_PINS)[number];
 
-type PostureRow = {
+export type PostureRow = {
     id: number;
     deviceId: string | null;
     deviceTimestamp: number | null;
@@ -36,10 +35,8 @@ type SensorPosition = {
 
 type ViewportSize = "mobile" | "tablet" | "desktop";
 
-/**
- * Explicit sensor positions are more reliable than flex row spacing here,
- * especially for the top pairs that were being clipped off the map.
- */
+const STALE_THRESHOLD_MS = 10_000;
+
 const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
     mobile: [
         { pin: "gpio32", top: "58%", left: "39%" },
@@ -66,8 +63,6 @@ const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
         { pin: "gpio39", top: "75%", left: "55%" },
     ],
 };
-
-const POLL_INTERVAL_MS = 2000;
 
 function valueToColor(normalized: number): string {
     const clamped = Math.max(0, Math.min(1, normalized));
@@ -115,47 +110,19 @@ function postureLabel(label: string | null): string {
     }
 }
 
-export function LiveHeatMap() {
-    const [devices, setDevices] = useState<string[]>([]);
-    const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
-    const [reading, setReading] = useState<PostureRow | null>(null);
-    const [loading, setLoading] = useState(true);
+export function LiveHeatMap({
+    reading,
+    loading,
+}: {
+    reading: PostureRow | null;
+    loading: boolean;
+}) {
     const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const STALE_THRESHOLD_MS = 10_000;
 
     const isLive =
         reading != null &&
         reading.label !== "no_seated" &&
         Date.now() - new Date(reading.createdAt).getTime() < STALE_THRESHOLD_MS;
-
-    // Load device list on mount
-    useEffect(() => {
-        fetchDeviceIds().then((ids) => {
-            setDevices(ids);
-            if (ids.length > 0) setSelectedDevice(ids[0]);
-            setLoading(false);
-        });
-    }, []);
-
-    useEffect(() => {
-        if (!selectedDevice) return;
-
-        const poll = () => {
-            fetchLatestReading(selectedDevice).then((row) => {
-                if (row) setReading(row as PostureRow);
-            });
-        };
-        
-        poll();
-        const interval = isLive ? POLL_INTERVAL_MS : POLL_INTERVAL_MS * 5;
-        intervalRef.current = setInterval(poll, interval);
-
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, [selectedDevice, isLive]);
 
     useEffect(() => {
         const updateViewportSize = () => {
@@ -172,7 +139,6 @@ export function LiveHeatMap() {
 
         updateViewportSize();
         window.addEventListener("resize", updateViewportSize);
-
         return () => {
             window.removeEventListener("resize", updateViewportSize);
         };
@@ -183,17 +149,6 @@ export function LiveHeatMap() {
             <Card>
                 <CardHeader><CardTitle className="text-lg">Live Pressure Map</CardTitle></CardHeader>
                 <CardContent><Skeleton className="h-[340px] w-full" /></CardContent>
-            </Card>
-        );
-    }
-
-    if (devices.length === 0) {
-        return (
-            <Card>
-                <CardHeader><CardTitle className="text-lg">Live Pressure Map</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="text-center py-8 text-muted-foreground">No devices found.</p>
-                </CardContent>
             </Card>
         );
     }
@@ -219,61 +174,40 @@ export function LiveHeatMap() {
     return (
         <Card>
             <CardHeader className="pb-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <CardTitle className="text-lg">Live Pressure Map</CardTitle>
-                        {reading && (
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                <span
-                                    className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                                        isLive
-                                            ? "bg-green-500/15 text-green-600 dark:text-green-400"
-                                            : "bg-muted text-muted-foreground"
+                <div>
+                    <CardTitle className="text-lg">Live Pressure Map</CardTitle>
+                    {reading && (
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span
+                                className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${isLive
+                                    ? "bg-green-500/15 text-green-600 dark:text-green-400"
+                                    : "bg-muted text-muted-foreground"
                                     }`}
-                                >
-                                    <span
-                                        className={`inline-block h-2 w-2 rounded-full ${
-                                            isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
+                            >
+                                <span
+                                    className={`inline-block h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
                                         }`}
-                                    />
-                                    {isLive ? "Live" : "Not Seated"}
-                                </span>
-                                <span>Reading #{reading.id}</span>
-                                {reading.label && (
-                                    <Badge variant="secondary">
-                                        {postureLabel(reading.label)}
-                                    </Badge>
-                                )}
-                                <span>{new Date(reading.createdAt).toLocaleString()}</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-                        {/* Device selector */}
-                        <select
-                            className="w-full min-w-0 max-w-full rounded border bg-background px-2 py-1 text-sm sm:w-[22rem] sm:max-w-[22rem]"
-                            value={selectedDevice ?? ""}
-                            onChange={(e) => {
-                                setSelectedDevice(e.target.value);
-                                setReading(null);
-                            }}
-                        >
-                            {devices.map((id) => (
-                                <option key={id} value={id}>{id}</option>
-                            ))}
-                        </select>
-                    </div>
+                                />
+                                {isLive ? "Live" : "Not Seated"}
+                            </span>
+                            {reading.id > 0 && <span>Reading #{reading.id}</span>}
+                            {reading.label && (
+                                <Badge variant="secondary">
+                                    {postureLabel(reading.label)}
+                                </Badge>
+                            )}
+                            <span>{new Date(reading.createdAt).toLocaleString()}</span>
+                        </div>
+                    )}
                 </div>
             </CardHeader>
             <CardContent>
                 {!reading ? (
                     <Skeleton className="h-[340px] w-full" />
                 ) : (
-                    <div
-                        className="relative mx-auto aspect-[4/3.2] w-full max-w-[54rem] overflow-visible rounded-2xl isolate"
-                    >
+                    <div className="relative mx-auto aspect-[4/3.2] w-full max-w-[54rem] overflow-visible rounded-2xl isolate">
                         <div
-                            className="absolute inset-0 rounded-2xl bg-center bg-no-repeat -scale-y-100 -z-0"
+                            className="absolute inset-0 -z-0 rounded-2xl bg-center bg-no-repeat -scale-y-100"
                             style={{
                                 backgroundImage: "url('/Top_Drawing.png')",
                                 backgroundSize: viewportSize === "mobile" ? "96% auto" : viewportSize === "tablet" ? "98% auto" : "112% auto",
@@ -289,10 +223,7 @@ export function LiveHeatMap() {
                                     <div
                                         key={pin}
                                         className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-700"
-                                        style={{
-                                            top,
-                                            left,
-                                        }}
+                                        style={{ top, left }}
                                     >
                                         <div
                                             className="absolute left-1/2 top-1/2 h-16 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-20 sm:w-24 lg:h-24 lg:w-28"
@@ -306,7 +237,6 @@ export function LiveHeatMap() {
                             })}
                         </div>
 
-                        {/* Legend */}
                         <div className="absolute bottom-2 left-1/2 z-10 flex w-[calc(100%-1.5rem)] max-w-max -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-background/80 px-3 py-2 text-[10px] text-muted-foreground backdrop-blur-sm sm:bottom-3 sm:w-auto sm:text-xs">
                             <span>Low</span>
                             <div

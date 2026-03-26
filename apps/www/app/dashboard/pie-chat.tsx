@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchDeviceIds, fetchPostureLabelCounts } from "./fetchPostureData";
 
-type LabelCountRow = {
+export type LabelCountRow = {
     label: string | null;
     count: number;
 };
@@ -49,44 +48,13 @@ function postureLabel(label: string | null): string {
     }
 }
 
-export function PosturePieChart() {
-    const [devices, setDevices] = useState<string[]>([]);
-    const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
-    const [counts, setCounts] = useState<LabelCountRow[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        let active = true;
-
-        fetchDeviceIds().then((ids) => {
-            if (!active) return;
-            setDevices(ids);
-            setSelectedDevice(ids[0] ?? null);
-        });
-
-        return () => {
-            active = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        let active = true;
-
-        setLoading(true);
-        fetchPostureLabelCounts(selectedDevice ?? undefined)
-            .then((rows) => {
-                if (!active) return;
-                setCounts(rows as LabelCountRow[]);
-            })
-            .finally(() => {
-                if (active) setLoading(false);
-            });
-
-        return () => {
-            active = false;
-        };
-    }, [selectedDevice]);
-
+export function PosturePieChart({
+    counts,
+    loading,
+}: {
+    counts: LabelCountRow[];
+    loading: boolean;
+}) {
     const slices = useMemo<ChartSlice[]>(() => {
         const total = counts.reduce((sum, row) => sum + Number(row.count), 0);
 
@@ -111,22 +79,11 @@ export function PosturePieChart() {
     return (
         <Card>
             <CardHeader className="pb-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <CardTitle className="text-lg">Posture Distribution</CardTitle>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            Historical posture labels across all readings
-                        </p>
-                    </div>
-                    <select
-                        className="w-full min-w-0 max-w-full rounded border bg-background px-2 py-1 text-sm sm:w-[22rem] sm:max-w-[22rem]"
-                        value={selectedDevice ?? ""}
-                        onChange={(e) => setSelectedDevice(e.target.value || null)}
-                    >
-                        {devices.map((id) => (
-                            <option key={id} value={id}>{id}</option>
-                        ))}
-                    </select>
+                <div>
+                    <CardTitle className="text-lg">Posture Distribution</CardTitle>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Historical posture labels for the selected device
+                    </p>
                 </div>
             </CardHeader>
             <CardContent>
