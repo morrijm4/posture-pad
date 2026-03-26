@@ -17,17 +17,56 @@ type PostureRow = {
     label: string | null;
 } & Record<GpioKey, number | null>;
 
+type SensorPosition = {
+    pin: GpioKey;
+    top: string;
+    left: string;
+};
+
+type ViewportSize = "mobile" | "tablet" | "desktop";
+
 /**
- * Physical layout of GPIO sensors on the pad.
- * Adjust this to match the actual sensor placement.
+ * Explicit sensor positions are more reliable than flex row spacing here,
+ * especially for the top pairs that were being clipped off the map.
  */
-const PAD_LAYOUT: GpioKey[][] = [
-    ["gpio14", "gpio25"],
-    ["gpio26", "gpio27"],
-    ["gpio32", "gpio33"],
-    ["gpio34", "gpio35"],
-    ["gpio36", "gpio39"],
-];
+const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
+    mobile: [
+        { pin: "gpio14", top: "35%", left: "41%" },
+        { pin: "gpio25", top: "35%", left: "59%" },
+        { pin: "gpio26", top: "49%", left: "38%" },
+        { pin: "gpio27", top: "49%", left: "62%" },
+        { pin: "gpio32", top: "58%", left: "34%" },
+        { pin: "gpio33", top: "58%", left: "66%" },
+        { pin: "gpio34", top: "65%", left: "38%" },
+        { pin: "gpio35", top: "65%", left: "62%" },
+        { pin: "gpio36", top: "65%", left: "46%" },
+        { pin: "gpio39", top: "65%", left: "54%" },
+    ],
+    tablet: [
+        { pin: "gpio14", top: "35%", left: "40%" },
+        { pin: "gpio25", top: "35%", left: "60%" },
+        { pin: "gpio26", top: "50%", left: "37%" },
+        { pin: "gpio27", top: "50%", left: "63%" },
+        { pin: "gpio32", top: "59%", left: "33%" },
+        { pin: "gpio33", top: "59%", left: "67%" },
+        { pin: "gpio34", top: "66%", left: "37%" },
+        { pin: "gpio35", top: "66%", left: "63%" },
+        { pin: "gpio36", top: "66%", left: "46%" },
+        { pin: "gpio39", top: "66%", left: "54%" },
+    ],
+    desktop: [
+        { pin: "gpio14", top: "35%", left: "38%" },
+        { pin: "gpio25", top: "35%", left: "62%" },
+        { pin: "gpio26", top: "50%", left: "35%" },
+        { pin: "gpio27", top: "50%", left: "65%" },
+        { pin: "gpio32", top: "59%", left: "30%" },
+        { pin: "gpio33", top: "59%", left: "70%" },
+        { pin: "gpio34", top: "66%", left: "35%" },
+        { pin: "gpio35", top: "66%", left: "65%" },
+        { pin: "gpio36", top: "66%", left: "45%" },
+        { pin: "gpio39", top: "66%", left: "55%" },
+    ],
+};
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -68,6 +107,8 @@ function postureLabel(label: string): string {
             return 'Leaning Left'
         case 'right':
             return 'Leaning Right'
+        case 'slouching':
+            return 'Slouching'
         default:
             return label;
     }
@@ -78,6 +119,7 @@ export function LiveHeatMap() {
     const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
     const [reading, setReading] = useState<PostureRow | null>(null);
     const [loading, setLoading] = useState(true);
+    const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const STALE_THRESHOLD_MS = 10_000;
@@ -114,6 +156,27 @@ export function LiveHeatMap() {
         };
     }, [selectedDevice, isLive]);
 
+    useEffect(() => {
+        const updateViewportSize = () => {
+            if (window.innerWidth < 640) {
+                setViewportSize("mobile");
+                return;
+            }
+            if (window.innerWidth < 1024) {
+                setViewportSize("tablet");
+                return;
+            }
+            setViewportSize("desktop");
+        };
+
+        updateViewportSize();
+        window.addEventListener("resize", updateViewportSize);
+
+        return () => {
+            window.removeEventListener("resize", updateViewportSize);
+        };
+    }, []);
+
     if (loading) {
         return (
             <Card>
@@ -148,7 +211,9 @@ export function LiveHeatMap() {
     if (!isFinite(min)) min = 0;
     if (!isFinite(max)) max = 1;
     const range = max - min || 1;
-    const normalize = (v: number | null) => (v != null ? (v - min) / range : null);
+    const normalize = (v: number | null) => ((v ?? 0) - min) / range;
+    const sensorPositions = SENSOR_POSITIONS[viewportSize];
+    const glowBlur = viewportSize === "mobile" ? "4px" : viewportSize === "tablet" ? "6px" : "10px";
 
     return (
         <Card>
@@ -157,24 +222,35 @@ export function LiveHeatMap() {
                     <div>
                         <CardTitle className="text-lg">Live Pressure Map</CardTitle>
                         {reading && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Reading #{reading.id}
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                <span
+                                    className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                                        isLive
+                                            ? "bg-green-500/15 text-green-600 dark:text-green-400"
+                                            : "bg-muted text-muted-foreground"
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-2 w-2 rounded-full ${
+                                            isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
+                                        }`}
+                                    />
+                                    {isLive ? "Live" : "Not Seated"}
+                                </span>
+                                <span>Reading #{reading.id}</span>
                                 {reading.label && (
-                                    <>
-                                        {" "}&middot;{" "}
-                                        <Badge variant="secondary" className="ml-1">
-                                            {postureLabel(reading.label)}
-                                        </Badge>
-                                    </>
+                                    <Badge variant="secondary">
+                                        {postureLabel(reading.label)}
+                                    </Badge>
                                 )}
-                                {" "}&middot; {new Date(reading.createdAt).toLocaleString()}
-                            </p>
+                                <span>{new Date(reading.createdAt).toLocaleString()}</span>
+                            </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                         {/* Device selector */}
                         <select
-                            className="rounded border bg-background px-2 py-1 text-sm"
+                            className="w-full min-w-0 max-w-full rounded border bg-background px-2 py-1 text-sm sm:w-[22rem] sm:max-w-[22rem]"
                             value={selectedDevice ?? ""}
                             onChange={(e) => {
                                 setSelectedDevice(e.target.value);
@@ -185,21 +261,6 @@ export function LiveHeatMap() {
                                 <option key={id} value={id}>{id}</option>
                             ))}
                         </select>
-                        {/* Seated status indicator */}
-                        <span
-                            className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                                isLive
-                                    ? "bg-green-500/15 text-green-600 dark:text-green-400"
-                                    : "bg-muted text-muted-foreground"
-                            }`}
-                        >
-                            <span
-                                className={`inline-block h-2 w-2 rounded-full ${
-                                    isLive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
-                                }`}
-                            />
-                            {isLive ? "Live" : "Not Seated"}
-                        </span>
                     </div>
                 </div>
             </CardHeader>
@@ -208,60 +269,53 @@ export function LiveHeatMap() {
                     <Skeleton className="h-[340px] w-full" />
                 ) : (
                     <div
-                        className="relative flex flex-col items-center gap-6 rounded-2xl overflow-hidden isolate"
-                        style={{ padding: "8rem", width: "fit-content", margin: "0 auto" }}>
+                        className="relative mx-auto aspect-[4/3.2] w-full max-w-[54rem] overflow-visible rounded-2xl isolate"
+                    >
                         <div
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat -scale-y-100 -z-0"
-                            style={{ backgroundImage: "url('/Top_Drawing.png')" }}
+                            className="absolute inset-0 rounded-2xl bg-center bg-no-repeat -scale-y-100 -z-0"
+                            style={{
+                                backgroundImage: "url('/Top_Drawing.png')",
+                                backgroundSize: viewportSize === "mobile" ? "96% auto" : viewportSize === "tablet" ? "98% auto" : "112% auto",
+                            }}
                         />
-                        <div className="relative rounded-2xl overflow-hidden">
-                            <div className="flex flex-col gap-2 relative z-10">
-                                {PAD_LAYOUT.map((pinsInRow, ri) => {
-                                    // Curve outward in the middle: row 0 and 4 are narrow, row 2 is widest
-                                    const gaps = [15, 25, 30, 25, 15];
-                                    const gap = gaps[ri] ?? 0.5;
-                                    return (
+                        <div className="absolute inset-0 z-10">
+                            {sensorPositions.map(({ pin, top, left }) => {
+                                const raw = reading[pin];
+                                const norm = normalize(raw);
+                                const color = valueToColor(norm);
+
+                                return (
+                                    <div
+                                        key={pin}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-700"
+                                        style={{
+                                            top,
+                                            left,
+                                        }}
+                                    >
                                         <div
-                                            key={ri}
-                                            className="flex justify-center"
-                                            style={{ gap: `${gap}rem` }}
-                                        >
-                                            {pinsInRow.map((pin) => {
-                                                const raw = reading[pin];
-                                                const norm = normalize(raw);
-                                                const color = norm != null ? valueToColor(norm) : "hsl(var(--muted) / 0.3)";
-                                                return (
-                                                    <div
-                                                        key={pin}
-                                                        className="relative w-28 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-700"
-                                                        style={{
-                                                            background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-                                                            filter: "blur(6px)",
-                                                        }}
-                                                    >
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                            className="absolute left-1/2 top-1/2 h-16 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full sm:h-20 sm:w-24 lg:h-24 lg:w-28"
+                                            style={{
+                                                background: `radial-gradient(circle, ${color} 0%, transparent 50%)`,
+                                                filter: `blur(${glowBlur})`,
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Legend */}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="absolute bottom-2 left-1/2 z-10 flex w-[calc(100%-1.5rem)] max-w-max -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-background/80 px-3 py-2 text-[10px] text-muted-foreground backdrop-blur-sm sm:bottom-3 sm:w-auto sm:text-xs">
                             <span>Low</span>
                             <div
-                                className="h-3 w-40 rounded-full"
+                                className="h-3 w-24 rounded-full sm:w-32 lg:w-40"
                                 style={{
                                     background:
                                         "linear-gradient(to right, rgb(59,130,246), rgb(34,197,194), rgb(250,204,21), rgb(239,68,68))",
                                 }}
                             />
                             <span>High</span>
-                            <span className="ml-2 tabular-nums">
-                                ({min} – {max})
-                            </span>
                         </div>
                     </div>
                 )}
