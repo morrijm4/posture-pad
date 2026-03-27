@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Activity, Cpu, Clock, Hash } from "lucide-react";
 import { LiveHeatMap, GPIO_PINS, type PostureRow, type GpioKey } from "./heat-map";
@@ -23,8 +22,9 @@ import { PosturePieChart, type LabelCountRow } from "./pie-chat";
 
 const PER_PAGE = 25;
 const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
-const MQTT_USERNAME = process.env.NEXT_PUBLIC_MQTT_USERNAME;
 const MQTT_TOPIC_TEMPLATE = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPLATE ?? "devices/{deviceId}/posture";
+const MQTT_USERNAME = "dumb";
+const MQTT_PASSWORD = "nsbafNTiAdGOw1nnidRRXarZ9G9WVKVltVZB2Pim1yc=";
 
 function postureLabel(label: string | null): string {
     switch (label) {
@@ -114,8 +114,7 @@ export default function DashboardPage() {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [mqttPassword, setMqttPassword] = useState("");
-    const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+    const [realtimeEnabled, setRealtimeEnabled] = useState(Boolean(MQTT_WS_URL));
     const mqttClientRef = useRef<MqttClient | null>(null);
     const activeTopicRef = useRef<string | null>(null);
 
@@ -192,7 +191,7 @@ export default function DashboardPage() {
             mqttClientRef.current ??
             mqtt.connect(MQTT_WS_URL, {
                 username: MQTT_USERNAME,
-                password: mqttPassword,
+                password: MQTT_PASSWORD,
                 reconnectPeriod: 5_000,
             });
         mqttClientRef.current = client;
@@ -259,7 +258,7 @@ export default function DashboardPage() {
                 activeTopicRef.current = null;
             }
         };
-    }, [mqttPassword, page, realtimeEnabled, selectedDevice]);
+    }, [page, realtimeEnabled, selectedDevice]);
 
     useEffect(() => {
         return () => {
@@ -294,20 +293,7 @@ export default function DashboardPage() {
                                 Device selection, manual refresh, and realtime updates for the full dashboard
                             </p>
                         </div>
-                        <form
-                            className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-end lg:gap-3"
-                            autoComplete="on"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                if (!realtimeEnabled && MQTT_WS_URL && mqttPassword.trim().length > 0) {
-                                    setRealtimeEnabled(true);
-                                    return;
-                                }
-                                if (realtimeEnabled) {
-                                    setRealtimeEnabled(false);
-                                }
-                            }}
-                        >
+                        <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-end lg:gap-3">
                             <select
                                 className="w-full min-w-0 max-w-full rounded border bg-background px-2 py-1 text-sm lg:w-[22rem] lg:max-w-[22rem]"
                                 value={selectedDevice ?? ""}
@@ -320,23 +306,17 @@ export default function DashboardPage() {
                                     <option key={id} value={id}>{id}</option>
                                 ))}
                             </select>
-                            <Input
-                                type="password"
-                                name="password"
-                                placeholder="MQTT password"
-                                autoComplete="current-password"
-                                className="w-full lg:w-48"
-                                value={mqttPassword}
-                                onChange={(e) => setMqttPassword(e.target.value)}
-                            />
+                            {/*
                             <Button
-                                type="submit"
+                                type="button"
                                 variant={realtimeEnabled ? "secondary" : "default"}
                                 className="w-full lg:w-auto"
-                                disabled={!realtimeEnabled && (!MQTT_WS_URL || mqttPassword.trim().length === 0)}
+                                disabled={!MQTT_WS_URL}
+                                onClick={() => setRealtimeEnabled((current) => !current)}
                             >
                                 {realtimeEnabled ? "Disable Realtime" : "Enable Realtime"}
                             </Button>
+                            */}
                             <Button
                                 type="button"
                                 variant="outline"
@@ -349,7 +329,7 @@ export default function DashboardPage() {
                             >
                                 Refresh
                             </Button>
-                        </form>
+                        </div>
                     </div>
                 </CardHeader>
             </Card>

@@ -10,7 +10,8 @@
     "scripts": {
         "build": "node ./esbuild.config.js build",
         "dev": "node ./esbuild.config.js watch",
-        "keygen": "bash keygen.sh"
+        "keygen": "bash keygen.sh",
+        "addpass": "mosquitto_passwd"
     },
     "dependencies": {
         "@pp/db": "workspace:*",
