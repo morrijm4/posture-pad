@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,31 +32,32 @@ type SensorPosition = {
 type ViewportSize = "mobile" | "tablet" | "desktop";
 
 const STALE_THRESHOLD_MS = 10_000;
+const HEAT_MAP_TRANSITION_MS = 450;
 
 const SENSOR_POSITIONS: Record<ViewportSize, SensorPosition[]> = {
     mobile: [
-        { pin: "gpio32", top: "58%", left: "39%" },
-        { pin: "gpio33", top: "58%", left: "61%" },
+        { pin: "gpio35", top: "72%", left: "54%" },
+        { pin: "gpio36", top: "58%", left: "61%" },
         { pin: "gpio34", top: "65%", left: "38%" },
-        { pin: "gpio35", top: "65%", left: "62%" },
-        { pin: "gpio36", top: "72%", left: "46%" },
-        { pin: "gpio39", top: "72%", left: "54%" },
+        { pin: "gpio39", top: "65%", left: "62%" },
+        { pin: "gpio32", top: "72%", left: "46%" },
+        { pin: "gpio33", top: "58%", left: "39%" },
     ],
     tablet: [
-        { pin: "gpio32", top: "55%", left: "38%" },
-        { pin: "gpio33", top: "55%", left: "62%" },
+        { pin: "gpio35", top: "75%", left: "54%" },
+        { pin: "gpio36", top: "55%", left: "62%" },
         { pin: "gpio34", top: "66%", left: "37%" },
-        { pin: "gpio35", top: "66%", left: "63%" },
-        { pin: "gpio36", top: "75%", left: "46%" },
-        { pin: "gpio39", top: "75%", left: "54%" },
+        { pin: "gpio39", top: "66%", left: "63%" },
+        { pin: "gpio32", top: "75%", left: "46%" },
+        { pin: "gpio33", top: "55%", left: "38%" },
     ],
     desktop: [
-        { pin: "gpio32", top: "55%", left: "35%" },
-        { pin: "gpio33", top: "55%", left: "65%" },
+        { pin: "gpio35", top: "75%", left: "55%" },
+        { pin: "gpio36", top: "55%", left: "65%" },
         { pin: "gpio34", top: "66%", left: "35%" },
-        { pin: "gpio35", top: "66%", left: "65%" },
-        { pin: "gpio36", top: "75%", left: "45%" },
-        { pin: "gpio39", top: "75%", left: "55%" },
+        { pin: "gpio39", top: "66%", left: "65%" },
+        { pin: "gpio32", top: "75%", left: "45%" },
+        { pin: "gpio33", top: "55%", left: "35%" },
     ],
 };
 
@@ -114,6 +115,10 @@ export function LiveHeatMap({
     loading: boolean;
 }) {
     const [viewportSize, setViewportSize] = useState<ViewportSize>("desktop");
+    const [animatedValues, setAnimatedValues] = useState<Record<GpioKey, number>>(() =>
+        Object.fromEntries(GPIO_PINS.map((pin) => [pin, 0])) as Record<GpioKey, number>
+    );
+    const animatedValuesRef = useRef(animatedValues);
 
     const isLive =
         reading != null &&
@@ -140,6 +145,51 @@ export function LiveHeatMap({
         };
     }, []);
 
+    useEffect(() => {
+        animatedValuesRef.current = animatedValues;
+    }, [animatedValues]);
+
+    useEffect(() => {
+        const targetValues = Object.fromEntries(
+            GPIO_PINS.map((pin) => [pin, Number(reading?.[pin] ?? 0)])
+        ) as Record<GpioKey, number>;
+
+        const startValues = animatedValuesRef.current;
+
+        if (GPIO_PINS.every((pin) => startValues[pin] === targetValues[pin])) {
+            return;
+        }
+
+        let frameId = 0;
+        const startTime = performance.now();
+
+        const animate = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / HEAT_MAP_TRANSITION_MS, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+
+            const nextValues = Object.fromEntries(
+                GPIO_PINS.map((pin) => [
+                    pin,
+                    startValues[pin] + (targetValues[pin] - startValues[pin]) * eased,
+                ])
+            ) as Record<GpioKey, number>;
+
+            animatedValuesRef.current = nextValues;
+            setAnimatedValues(nextValues);
+
+            if (progress < 1) {
+                frameId = window.requestAnimationFrame(animate);
+            }
+        };
+
+        frameId = window.requestAnimationFrame(animate);
+
+        return () => {
+            window.cancelAnimationFrame(frameId);
+        };
+    }, [reading]);
+
     if (loading) {
         return (
             <Card>
@@ -153,7 +203,7 @@ export function LiveHeatMap({
     let max = -Infinity;
     if (reading) {
         for (const pin of GPIO_PINS) {
-            const v = reading[pin];
+            const v = animatedValues[pin];
             if (v != null) {
                 if (v < min) min = v;
                 if (v > max) max = v;
@@ -211,7 +261,7 @@ export function LiveHeatMap({
                         />
                         <div className="absolute inset-0 z-10">
                             {sensorPositions.map(({ pin, top, left }) => {
-                                const raw = reading[pin];
+                                const raw = animatedValues[pin];
                                 const norm = normalize(raw);
                                 const color = valueToColor(norm);
 
