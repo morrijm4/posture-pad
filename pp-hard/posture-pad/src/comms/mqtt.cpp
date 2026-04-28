@@ -1,10 +1,12 @@
 #include "mqtt.hpp"
 
 namespace comms {
-    void serial_csv(int *sense_vals, size_t n) {
+    void serial_csv(float *sense_vals, size_t n) {
         Serial.print("[CSV]");
         for (int i = 0; i < n; ++i) {
-            Serial.print(sense_vals[i], 1); Serial.print(",");
+            // Serial.print(sense_vals[i], 1); 
+            // Serial.print(",");
+            Serial.printf("%f,", sense_vals[i]);
         }
         Serial.println();
     }
@@ -171,7 +173,7 @@ namespace comms {
         return false;
     }
 
-    void MQTT::publish_posture(posture::PostureResult posture_res, int *sensor_vals) {
+    void MQTT::publish_posture(posture::PostureResult posture_res, float *sensor_vals) {
         StaticJsonDocument<512> doc;
         JsonObject sensors = doc.createNestedObject("sensors");
 
@@ -181,9 +183,9 @@ namespace comms {
             sensors[key] = sensor_vals[i];
         }
 
-        for (int i = 0; i < ADC2_COUNT; i++) {
+        for (int i = 0; i < SPI_ADC_COUNT; i++) {
             char key[8];
-            snprintf(key, sizeof(key), "GPIO%d", ADC2_PINS[i]);
+            snprintf(key, sizeof(key), "GPIO%d", SPI_ADC_PINS[i]);
             sensors[key] = sensor_vals[ADC1_COUNT + i];
         }
 
@@ -201,7 +203,7 @@ namespace comms {
         Serial.printf("[MQTT] Publish %s: %s\n", ok ? "OK" : "FAILED", buf);
     }
 
-    void MQTT::send_data(int *sensor_values, posture::PostureResult posture_res) {
+    void MQTT::send_data(float *sensor_values, posture::PostureResult posture_res) {
         if (!mqttClient.connected()) {
             Serial.println("[MQTT] Not connected — attempting reconnect...");
             reconnect();

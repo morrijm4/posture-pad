@@ -14,13 +14,13 @@ namespace posture {
         public:
             SVM();
             int predict(float *x);
-            PostureResult eval(int *pos_vals, int n);
+            PostureResult eval(float *pos_vals, int n);
 
         protected:
-            float compute_kernel(float *x, ...);
             const char* posture_label(int cls);
             bool posture_is_poor(int cls);
             uint8_t posture_count;
+            void poly_expand(float* raw, float* out);
 
         private:
             uint64_t buffer;

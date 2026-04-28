@@ -33,12 +33,12 @@ void setup() {
 
 void loop() {
     fsr_sensors.read_sensors();
-    int fsr_readings[TOTAL_SENSORS];
+    float fsr_readings[TOTAL_SENSORS];
     fsr_sensors.get_sensor_value(fsr_readings, TOTAL_SENSORS);
 
     posture::PostureResult posture_res = posture_model.eval(fsr_readings, TOTAL_SENSORS);
     
-    if (posture_res.is_poor) {
+    if (device_config.hapticsEnabled && posture_res.is_poor) {
         posture_haptics.buzz();
     }
     if (device_config.mqttEnabled && strcmp(posture_res.label, "no_seated") != 0) {

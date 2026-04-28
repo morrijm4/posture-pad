@@ -13,13 +13,13 @@
 #include "esp_wifi.h"
 
 namespace comms {
-    void serial_csv(int *sense_vals, size_t n);
+    void serial_csv(float *sense_vals, size_t n);
     
     class MQTT {
         public:
             MQTT();
             void setup_connection();
-            void send_data(int *sensor_values, posture::PostureResult posture_res);
+            void send_data(float *sensor_values, posture::PostureResult posture_res);
             void reconnect();
             void disconnect();
             void enter_light_sleep();
@@ -38,7 +38,7 @@ namespace comms {
             bool mqtt_connect();
             void mqtt_callback(char* topic, byte* payload, unsigned int length);
             static void mqtt_callback_static(char* topic, byte* payload, unsigned int length);
-            void publish_posture(posture::PostureResult posture_res, int *sensor_vals);
+            void publish_posture(posture::PostureResult posture_res, float *sensor_vals);
             void wifi_on();
             void wifi_off();
 

@@ -5,7 +5,7 @@ namespace storage {
         preferences.begin("posture", true);
         device_config.hapticBuzzLength = preferences.getUInt("buzzLength",  device_config.hapticBuzzLength);
         device_config.hapticEffect = preferences.getUInt("buzzEffect",  device_config.hapticEffect);
-        device_config.hapticsEnabled = preferences.getBool("haptics",    device_config.hapticsEnabled);
+        // device_config.hapticsEnabled = preferences.getBool("haptics",    device_config.hapticsEnabled);
         device_config.sleep_duration_us = preferences.getULong64("sleep_len", device_config.sleep_duration_us);
         device_config.gmtOffset_sec = preferences.getLong("gmt_ofst", device_config.gmtOffset_sec);
         device_config.daylight_savings_offset = preferences.getInt("dylgt_ofst", device_config.daylight_savings_offset);
