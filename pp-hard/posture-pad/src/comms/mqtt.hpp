@@ -29,6 +29,7 @@ namespace comms {
             static MQTT* instance;
             char posture_topic[96] = "";
             char config_topic[96] = "";
+            char weights_topic[96] = "";
             int MQTT_MAX_RETRIES = 3;
             // WiFiClient wifiClient;
             WiFiClientSecure wifiClient;

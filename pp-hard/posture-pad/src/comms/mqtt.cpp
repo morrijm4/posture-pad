@@ -4,8 +4,6 @@ namespace comms {
     void serial_csv(float *sense_vals, size_t n) {
         Serial.print("[CSV]");
         for (int i = 0; i < n; ++i) {
-            // Serial.print(sense_vals[i], 1); 
-            // Serial.print(",");
             Serial.printf("%f,", sense_vals[i]);
         }
         Serial.println();
@@ -60,9 +58,10 @@ namespace comms {
 
 
     void MQTT::setup_connection() {
-        mqttClient.setBufferSize(2048);
+        mqttClient.setBufferSize(WEIGHT_PAYLOAD_SIZE + 64);
         sprintf(posture_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_POSTURE);
         sprintf(config_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_CONFIG);
+        sprintf(weights_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_WEIGHTS);
         wifi_on();
         sync_time();
         wifiClient.setCACert(ROOT_CA);
@@ -106,32 +105,60 @@ namespace comms {
     void MQTT::mqtt_callback(char* topic, byte* payload, unsigned int length) {
         Serial.printf("[MQTT] Message on %s\n", topic);
         Serial.printf("[MQTT] Callback fired — topic: %s length: %d\n", topic, length);
-        StaticJsonDocument<256> doc;
-        DeserializationError err = deserializeJson(doc, payload, length);
-        if (err) {
-            Serial.printf("[MQTT] JSON parse error: %s\n", err.c_str());
-            return;
-        }
+        if (strcmp(topic, config_topic) == 0) {
+            StaticJsonDocument<256> doc;
+            DeserializationError err = deserializeJson(doc, payload, length);
+            if (err) {
+                Serial.printf("[MQTT] JSON parse error: %s\n", err.c_str());
+                return;
+            }
 
-        bool changed = false;
+            bool changed = false;
 
-        if (doc.containsKey("buzzLength")) {
-            device_config.hapticBuzzLength = doc["buzzLength"].as<int>();
-            Serial.printf("[Config] buzzLength → %d\n", device_config.hapticBuzzLength);
-            changed = true;
+            if (doc.containsKey("buzzLength")) {
+                device_config.hapticBuzzLength = doc["buzzLength"].as<int>();
+                Serial.printf("[Config] buzzLength → %d\n", device_config.hapticBuzzLength);
+                changed = true;
+            }
+            if (doc.containsKey("buzzEffect")) {
+                device_config.hapticEffect = doc["buzzEffect"].as<uint8_t>();
+                Serial.printf("[Config] buzzEffect → %d\n", device_config.hapticEffect);
+                changed = true;
+            }
+            if (doc.containsKey("haptics")) {
+                device_config.hapticsEnabled = doc["haptics"].as<bool>();
+                Serial.printf("[Config] haptics → %s\n", device_config.hapticsEnabled ? "on" : "off");
+                changed = true;
+            }
+            if (changed) preferences.save_settings();
         }
-        if (doc.containsKey("buzzEffect")) {
-            device_config.hapticEffect = doc["buzzEffect"].as<uint8_t>();
-            Serial.printf("[Config] buzzEffect → %d\n", device_config.hapticEffect);
-            changed = true;
-        }
-        if (doc.containsKey("haptics")) {
-            device_config.hapticsEnabled = doc["haptics"].as<bool>();
-            Serial.printf("[Config] haptics → %s\n", device_config.hapticsEnabled ? "on" : "off");
-            changed = true;
-        }
+        else if (strcmp(topic, weights_topic) == 0) {
+            if (length != WEIGHT_PAYLOAD_SIZE) {
+                Serial.printf("[MQTT] Bad payload: got %u bytes, expected %u\n",
+                            length, WEIGHT_PAYLOAD_SIZE);
+                return;
+            }
 
-        if (changed) preferences.save_settings();
+            // Lock out inference during update (single-core safe with taskENTER_CRITICAL)
+            portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+            taskENTER_CRITICAL(&mux);
+
+            // Copy coef: first N_CLASSES*N_POLY floats
+            memcpy(coef, payload, N_CLASSES * N_POLY * sizeof(float));
+
+            // Copy intercept: remaining N_CLASSES floats
+            memcpy(intercept,
+                payload + N_CLASSES * N_POLY * sizeof(float),
+                N_CLASSES * sizeof(float));
+
+            taskEXIT_CRITICAL(&mux);
+
+            Serial.println("[MQTT] Weights updated successfully");
+        } 
+        else {
+            Serial.println("[CALLBACK] Unrecognized Subscribe Topic");
+        }
+        
     }
 
     bool MQTT::mqtt_reconnect() {
@@ -157,6 +184,7 @@ namespace comms {
                 // the subscription for all future reconnects
                 if (firstBoot) {
                     mqttClient.subscribe(config_topic, 1); // QoS 1
+                    mqttClient.subscribe(weights_topic, 1); // QoS 1
                     Serial.println("[MQTT] Subscribed to config topic");
                     firstBoot = false;
                 }

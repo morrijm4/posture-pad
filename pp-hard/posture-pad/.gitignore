@@ -6,3 +6,5 @@
 .vscode/
 old/
 include/secrets.hpp
+posture-workspace*
+./python_scripts/.venv

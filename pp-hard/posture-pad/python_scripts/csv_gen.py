@@ -30,21 +30,27 @@ def main():
     ser.flushInput()
     time.sleep(1)
 
-    while True:
-        try:
-            raw  = ser.readline()
-            line = raw.decode("utf-8", errors="replace").strip()
-        except Exception:
-            continue
+    try:
+        readings = 0
+        while True:
+            try:
+                raw  = ser.readline()
+                line = raw.decode("utf-8", errors="replace").strip()
+            except Exception:
+                continue
 
-        if not line:
-            continue
-            
-        if "CSV" in line:
-            data = line[5:]
-            csv_line = ",".join(data.split(",")[:-1])
-            with open(csv_out, "a") as f:
-                f.write(csv_line + '\n')
+            if not line:
+                continue
+                
+            if "CSV" in line:
+                data = line[5:]
+                csv_line = ",".join(data.split(",")[:-1])
+                with open(csv_out, "a") as f:
+                    f.write(csv_line + '\n')
+                readings += 1
+                print("Recordings:", readings, end='\r')
+    except KeyboardInterrupt:
+        print(f"\nData recorded in {csv_out}")
         
 if __name__ == "__main__":
     main()
