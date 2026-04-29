@@ -58,7 +58,7 @@ namespace comms {
 
 
     void MQTT::setup_connection() {
-        mqttClient.setBufferSize(WEIGHT_PAYLOAD_SIZE + 64);
+        mqttClient.setBufferSize(WEIGHT_PAYLOAD_SIZE + 256);
         sprintf(posture_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_POSTURE);
         sprintf(config_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_CONFIG);
         sprintf(weights_topic, "%s/%s/%s", TOPIC_ROOT, device_config.device_id, TOPIC_WEIGHTS);
@@ -173,8 +173,6 @@ namespace comms {
 
         // Track whether this is the first ever connection
         // RTC_DATA_ATTR survives light sleep and deep sleep
-        static RTC_DATA_ATTR bool firstBoot = true;
-
         int retries = 0;
         while (!mqttClient.connected() && retries < 3) {
             bool connected = mqttClient.connect(device_config.device_id, MQTT_USER, MQTT_PASS);
@@ -182,12 +180,11 @@ namespace comms {
             if (connected) {
                 // Only subscribe on first boot — broker remembers
                 // the subscription for all future reconnects
-                if (firstBoot) {
-                    mqttClient.subscribe(config_topic, 1); // QoS 1
-                    mqttClient.subscribe(weights_topic, 1); // QoS 1
-                    Serial.println("[MQTT] Subscribed to config topic");
-                    firstBoot = false;
-                }
+                bool success;
+                success = mqttClient.subscribe(config_topic, 1); // QoS 1
+                Serial.printf("[MQTT] Subscribed to %s: %d\n", config_topic, success);
+                success = mqttClient.subscribe(weights_topic, 1); // QoS 1
+                Serial.printf("[MQTT] Subscribed to %s: %d\n", weights_topic, success);
 
                 Serial.println("[MQTT] Reconnected");
                 return true;
@@ -238,10 +235,6 @@ namespace comms {
         }
 
         publish_posture(posture_res, sensor_values);
-
-        // Give broker time to receive before sleeping
-        mqttClient.loop();
-        delay(100);
     }
 
     void MQTT::enter_light_sleep() {
@@ -250,5 +243,13 @@ namespace comms {
         esp_sleep_enable_timer_wakeup(device_config.sleep_duration_us);
         esp_light_sleep_start();
         Serial.println("[Sleep] Woke up");
+    }
+
+    void MQTT::delay(unsigned long ms) {
+        unsigned long start = millis();
+        Serial.printf("[MQTT_HEALTH] connected: %s | state: %d\n", mqttClient.connected() ? "YES" : "NO", mqttClient.state());
+        while(millis() - start < ms) {
+            mqttClient.loop();
+        }
     }
 }

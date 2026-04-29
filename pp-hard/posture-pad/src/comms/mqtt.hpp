@@ -24,6 +24,7 @@ namespace comms {
             void disconnect();
             void enter_light_sleep();
             void sync_time();
+            void delay(unsigned long);
 
         private:
             static MQTT* instance;

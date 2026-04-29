@@ -55,8 +55,9 @@ void loop() {
     }
     if (device_config.mqttEnabled && strcmp(posture_res.label, "no_seated") != 0) {
         posture_mqtt.send_data(fsr_readings, posture_res);
+        posture_mqtt.delay(300);
     } else if (!device_config.mqttEnabled) {
         comms::serial_csv(fsr_readings, TOTAL_SENSORS);
+        delay(200);
     }
-    delay(200);
 }
