@@ -54,6 +54,8 @@ def export_weights_bin(coef:np.ndarray, inter:np.ndarray):
     intercept = inter.astype(np.float32)  
     payload = struct.pack(f'{len(coef_flat)}f', *coef_flat) + \
               struct.pack(f'{len(intercept)}f', *intercept)
+    with open("weights.bin", "wb") as f:
+        f.write(payload)
     return payload
 
 
@@ -90,4 +92,3 @@ if __name__ == '__main__':
     else:
         # print out the payload in binary
         payload = export_weights_bin(svm.coef_, svm.intercept_)
-        print(payload)
