@@ -74,18 +74,29 @@ export default function Page() {
             reconnectPeriod: 5_000,
         });
 
-        client.current.on("connect", (packet) => {
+        function handleConnect() {
             setConnecting(false)
             client.current?.subscribe(MQTT_TOPIC);
-        })
-        client.current.on("error", (err) => console.error("Error!", err));
-        client.current.on("message", (topic, buf, _packet) => {
+        }
+
+        function handleError(err: Error | mqtt.ErrorWithReasonCode) {
+            console.error("MQTT Error:", err);
+        }
+
+        function handleMessage(topic: string, buf: Buffer<ArrayBufferLike>) {
             const data = JSON.parse(buf.toString());
             console.log(data);
-        })
+        }
+
+        client.current.on("connect", handleConnect);
+        client.current.on("error", handleError);
+        client.current.on("message", handleMessage);
 
         return () => {
             if (client.current == null) return;
+            client.current.removeListener("connect", handleConnect);
+            client.current.removeListener("error", handleError);
+            client.current.removeListener("message", handleMessage);
             client.current.unsubscribe(MQTT_TOPIC);
             client.current = null;
         }
