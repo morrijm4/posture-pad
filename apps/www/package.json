@@ -10,7 +10,8 @@
         "genkeypair": "node ./scripts/genkeypair.ts",
         "encrypt": "node ./scripts/encrypt.ts",
         "decrypt": "node ./scripts/decrypt.ts",
-        "getall": "tsx ./scripts/getall.ts"
+        "getall": "tsx ./scripts/getall.ts",
+        "widget:bridge": "node ./scripts/widget-bridge.mjs"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",

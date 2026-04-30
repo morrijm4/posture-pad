@@ -23,8 +23,9 @@ import { PosturePieChart, type LabelCountRow } from "./pie-chat";
 const PER_PAGE = 25;
 const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
 const MQTT_TOPIC_TEMPLATE = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPLATE ?? "devices/{deviceId}/posture";
-const MQTT_USERNAME = "dumb";
-const MQTT_PASSWORD = "nsbafNTiAdGOw1nnidRRXarZ9G9WVKVltVZB2Pim1yc=";
+const MQTT_USERNAME = process.env.NEXT_PUBLIC_MQTT_USERNAME;
+const MQTT_PASSWORD = process.env.NEXT_PUBLIC_MQTT_PASSWORD;
+const CAN_CONNECT_REALTIME = Boolean(MQTT_WS_URL && MQTT_USERNAME && MQTT_PASSWORD);
 
 function postureLabel(label: string | null): string {
     switch (label) {
@@ -114,7 +115,9 @@ export default function DashboardPage() {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [realtimeEnabled, setRealtimeEnabled] = useState(Boolean(MQTT_WS_URL));
+    const [realtimeEnabled, setRealtimeEnabled] = useState(CAN_CONNECT_REALTIME);
+    const [desktopWidgetEnabled, setDesktopWidgetEnabled] = useState(true);
+    const [desktopWidgetSaving, setDesktopWidgetSaving] = useState(false);
     const mqttClientRef = useRef<MqttClient | null>(null);
     const activeTopicRef = useRef<string | null>(null);
 
@@ -134,6 +137,46 @@ export default function DashboardPage() {
             active = false;
         };
     }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadDesktopWidgetPreference = async () => {
+            try {
+                const response = await fetch("/api/widget-preferences", {
+                    method: "GET",
+                    cache: "no-store",
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to load widget preference");
+                }
+
+                const payload = (await response.json()) as { enabled?: boolean };
+                if (!cancelled && typeof payload.enabled === "boolean") {
+                    setDesktopWidgetEnabled(payload.enabled);
+                    window.localStorage.setItem("posturepad.desktopWidgetEnabled", String(payload.enabled));
+                }
+            } catch {
+                const storedValue = window.localStorage.getItem("posturepad.desktopWidgetEnabled");
+                if (!cancelled && storedValue != null) {
+                    setDesktopWidgetEnabled(storedValue === "true");
+                }
+            }
+        };
+
+        void loadDesktopWidgetPreference();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        window.localStorage.setItem(
+            "posturepad.desktopWidgetEnabled",
+            String(desktopWidgetEnabled),
+        );
+    }, [desktopWidgetEnabled]);
 
     const loadDashboardData = async (opts?: { quiet?: boolean }) => {
         if (!selectedDevice) {
@@ -182,7 +225,7 @@ export default function DashboardPage() {
             return;
         }
 
-        if (!selectedDevice || !MQTT_WS_URL) {
+        if (!selectedDevice || !MQTT_WS_URL || !MQTT_USERNAME || !MQTT_PASSWORD) {
             return;
         }
 
@@ -306,6 +349,46 @@ export default function DashboardPage() {
                                     <option key={id} value={id}>{id}</option>
                                 ))}
                             </select>
+                            <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={desktopWidgetEnabled}
+                                    disabled={desktopWidgetSaving}
+                                    onChange={async (e) => {
+                                        const nextValue = e.target.checked;
+                                        setDesktopWidgetEnabled(nextValue);
+                                        setDesktopWidgetSaving(true);
+                                        window.localStorage.setItem(
+                                            "posturepad.desktopWidgetEnabled",
+                                            String(nextValue),
+                                        );
+
+                                        try {
+                                            const response = await fetch("/api/widget-preferences", {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                },
+                                                body: JSON.stringify({ enabled: nextValue }),
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error("Failed to save widget preference");
+                                            }
+                                        } catch {
+                                            setDesktopWidgetEnabled(!nextValue);
+                                            window.localStorage.setItem(
+                                                "posturepad.desktopWidgetEnabled",
+                                                String(!nextValue),
+                                            );
+                                        } finally {
+                                            setDesktopWidgetSaving(false);
+                                        }
+                                    }}
+                                />
+                                <span>Desktop widget {desktopWidgetSaving ? "..." : ""}</span>
+                            </label>
                             {/*
                             <Button
                                 type="button"
@@ -333,6 +416,11 @@ export default function DashboardPage() {
                     </div>
                 </CardHeader>
             </Card>
+
+            <p className="text-xs text-muted-foreground">
+                Desktop widget is currently {desktopWidgetEnabled ? "enabled" : "disabled"} for this browser.
+                On this machine, the Mac widget will hide when this setting is off.
+            </p>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <SummaryCard
