@@ -1,8 +1,8 @@
 "use client";
 
-import mqtt, { type MqttClient } from 'mqtt';
-import { useState, useEffect, useRef, type Dispatch, type RefObject, type SetStateAction } from 'react';
 import { Button } from "@/components/ui/button";
+import mqtt, { type MqttClient } from 'mqtt';
+import { useEffect, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
 
 const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
 const MQTT_USERNAME = "dumb";
@@ -13,10 +13,14 @@ const DATA_COLLECTION_THRESHOLD = 2;
 type Label = "good" | "slouching" | "right" | "left" | "mega";
 
 type StageProps = {
-    next: () => void;
-}
+    next: () => void
+};
 
-type PostureData = { label: Label, from: number, to: number };
+type StageControlsProps = StageProps & {
+    back?: () => void
+};
+
+type PostureData = { label: Label; from: number; to: number };
 
 type PostureStageProps = {
     message: string;
@@ -25,14 +29,20 @@ type PostureStageProps = {
     setData: Dispatch<SetStateAction<PostureData[]>>;
 };
 
-type PostureStageStates = "start" | "countdown" | "collect" | "standup"
+type PostureStageState = "start" | "countdown" | "collect" | "standup";
 
-interface CountdownProps {
+type CountdownProps = {
     seconds: number;
 }
 
+type PostureStageConfig = {
+    message: string;
+    label: Label;
+};
 
-const POSTURE_STAGES: Array<{ message: string, label: Label }> = [
+type PostureStageSwitchProps = { standups: number } & PostureStageProps & StageProps;
+
+const POSTURE_STAGES: PostureStageConfig[] = [
     {
         message: "Sit in good posture",
         label: "good",
@@ -55,27 +65,21 @@ const POSTURE_STAGES: Array<{ message: string, label: Label }> = [
     },
 ];
 
-export default function Page() {
-    if (typeof MQTT_WS_URL !== 'string') throw new Error("NO WS URL");
-
-    const [i, setIndex] = useState(0);
-    const [data, setData] = useState<PostureData[]>([]);
-    useEffect(() => console.log("Posture data", data), [data]);
-
-
+function useCalibrationClient(mqttWsUrl: string) {
     const client = useRef<MqttClient>(null);
     const [connecting, setConnecting] = useState(true);
+
     useEffect(() => {
         if (client.current != null) return;
 
-        client.current = mqtt.connect(MQTT_WS_URL, {
+        client.current = mqtt.connect(mqttWsUrl, {
             username: MQTT_USERNAME,
             password: MQTT_PASSWORD,
             reconnectPeriod: 5_000,
         });
 
         function handleConnect() {
-            setConnecting(false)
+            setConnecting(false);
             client.current?.subscribe(MQTT_TOPIC);
         }
 
@@ -99,20 +103,43 @@ export default function Page() {
             client.current.removeListener("message", handleMessage);
             client.current.unsubscribe(MQTT_TOPIC);
             client.current = null;
-        }
+        };
     }, []);
 
-    if (connecting) return;
+    return { client, connecting };
+}
 
-    const stages = [
-        <StartStage next={next} />,
-        ...POSTURE_STAGES.map(s => <PostureStage key={s.message} next={next} setData={setData} clientRef={client} {...s} />),
-        <EndStage next={next} />
+function createStages(
+    next: () => void,
+    setData: Dispatch<SetStateAction<PostureData[]>>,
+    client: RefObject<MqttClient | null>,
+) {
+    return [
+        <StartStage key="start" next={next} />,
+        ...POSTURE_STAGES.map((stage) => (
+            <PostureStage key={stage.message} next={next} setData={setData} clientRef={client} {...stage} />
+        )),
+        <EndStage key="end" next={next} />,
     ];
+}
+
+export default function Page() {
+    if (typeof MQTT_WS_URL !== 'string') throw new Error("NO WS URL");
+
+    const [i, setIndex] = useState(0);
+    const [data, setData] = useState<PostureData[]>([]);
+    useEffect(() => console.log("Posture data", data), [data]);
+
+    const { client, connecting } = useCalibrationClient(MQTT_WS_URL);
+
+    if (connecting) return;
 
     function next() {
         setIndex(i => i < stages.length ? ++i : i);
     }
+
+    const stages = createStages(next, setData, client);
+
     return (
         <div className="flex flex-col gap-8 max-w-lg mx-auto my-36">
             <div className="flex justify-between">
@@ -146,8 +173,8 @@ function PostureStage(props: PostureStageProps & StageProps) {
     );
 }
 
-function PostureStageSwitch(props: { standups: number } & PostureStageProps & StageProps) {
-    const [state, setState] = useState<PostureStageStates>("start");
+function PostureStageSwitch(props: PostureStageSwitchProps) {
+    const [state, setState] = useState<PostureStageState>("start");
     const [standups, setStandups] = useState(props.standups);
 
     function standupNext() {
@@ -160,15 +187,15 @@ function PostureStageSwitch(props: { standups: number } & PostureStageProps & St
         case "start":
             return <Button onClick={() => setState("countdown")}>Start</Button>
         case "countdown":
-            return <Countdown seconds={1} next={() => setState("collect")} back={() => { }} />
+            return <Countdown seconds={1} next={() => setState("collect")} />
         case "collect":
             return <Collect {...props} next={() => setState("standup")} />;
         case "standup":
-            return <Standup standups={standups} next={standupNext} back={() => { }} />
+            return <Standup standups={standups} next={standupNext} />
     }
 }
 
-function Countdown({ seconds, next }: CountdownProps & StageProps) {
+function Countdown({ seconds, next }: CountdownProps & StageControlsProps) {
     const [time, setTime] = useState(seconds);
 
     useEffect(() => {
@@ -206,7 +233,7 @@ function Collect({ clientRef, next, label, setData }: PostureStageProps & StageP
     return "Collecting data"
 }
 
-function Standup(props: { standups: number } & StageProps) {
+function Standup(props: { standups: number } & StageControlsProps) {
     if (props.standups == 0) {
         return (
             <div>
@@ -223,4 +250,3 @@ function Standup(props: { standups: number } & StageProps) {
         </div>
     );
 }
-
