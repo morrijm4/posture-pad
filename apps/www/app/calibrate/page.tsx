@@ -327,21 +327,23 @@ function Collect({ clientRef, next, label, setData }: PostureStageProps & StageP
     const count = useRef(0);
     const [collecting, setCollecting] = useState(true);
 
-    function handleMessage(_topic: string, buf: Buffer<ArrayBufferLike>) {
-        const msg: { timestamp: number } = JSON.parse(buf.toString());
-
-        count.current++;
-
-        if (count.current === 1) {
-            setData((prev) => [{ label, from: msg.timestamp, to: 0 }, ...prev])
-        } else if (count.current === DATA_COLLECTION_THRESHOLD) {
-            setData((prev) => [{ ...prev[0], to: msg.timestamp }, ...prev.slice(1)])
-            setCollecting(false);
-        }
-    }
 
     useEffect(() => {
         if (!collecting) return next();
+
+        function handleMessage(_topic: string, buf: Buffer<ArrayBufferLike>) {
+            const msg: { timestamp: number } = JSON.parse(buf.toString());
+
+            count.current++;
+
+            if (count.current === 1) {
+                setData((prev) => [{ label, from: msg.timestamp, to: 0 }, ...prev])
+            } else if (count.current === DATA_COLLECTION_THRESHOLD) {
+                setData((prev) => [{ ...prev[0], to: msg.timestamp }, ...prev.slice(1)])
+                setCollecting(false);
+            }
+        }
+
         clientRef.current?.on("message", handleMessage);
         return () => void clientRef.current?.removeListener("message", handleMessage);
     }, [collecting]);

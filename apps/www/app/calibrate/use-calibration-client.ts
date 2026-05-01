@@ -28,8 +28,6 @@ export function useCalibrationClient(mqttWsUrl: string) {
 
         function handleMessage(topic: string, buf: Buffer<ArrayBufferLike>) {
             if (connecting) setConnecting(false);
-            const data = JSON.parse(buf.toString());
-            console.log(data);
         }
 
         client.current.on("connect", handleConnect);
