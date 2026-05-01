@@ -9,7 +9,7 @@ import { useCalibrationClient } from './use-calibration-client';
 
 const MQTT_WS_URL = process.env.NEXT_PUBLIC_MQTT_WS_URL;
 const DATA_COLLECTION_COUNTDOWN_SECONDS = 3;
-const DATA_COLLECTION_THRESHOLD = 50;
+const DATA_COLLECTION_THRESHOLD = 10;
 const DATA_COLLECTION_STANDUPS = 0;
 
 type Label = "good" | "slouch" | "right" | "left" | "mega";
@@ -109,24 +109,24 @@ export default function Page() {
         if (i < stages.length) setIndex(++i);
 
         if (i === stages.length - 1) {
-            try {
-                const res = await fetch("https://pp.mattymo.dev/train", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        device_id: "a37b86a1b4df2f130bc71abd1a4b0452b98132b6b61eed547b2d582147db69dd",
-                        num_samples: DATA_COLLECTION_THRESHOLD,
-                        data,
-                    }),
-                });
+            // try {
+            //     const res = await fetch("https://pp.mattymo.dev/train", {
+            //         method: "POST",
+            //         headers: {
+            //             "Content-Type": "application/json"
+            //         },
+            //         body: JSON.stringify({
+            //             device_id: "a37b86a1b4df2f130bc71abd1a4b0452b98132b6b61eed547b2d582147db69dd",
+            //             num_samples: DATA_COLLECTION_THRESHOLD,
+            //             data,
+            //         }),
+            //     });
 
-                console.log(res.status, res.statusText, await res.text());
-            } catch (err) {
-                console.error("Error sending training data");
-                console.error(err);
-            }
+            //     console.log(res.status, res.statusText, await res.text());
+            // } catch (err) {
+            //     console.error("Error sending training data");
+            //     console.error(err);
+            // }
         }
     }
 
