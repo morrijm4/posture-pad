@@ -1,5 +1,6 @@
 import mqtt from 'mqtt';
 import { Repository } from '@pp/db/repo';
+import { postureTable } from '@pp/db/tables/posture-data';
 
 async function main() {
     const pwd = process.env.MQTT_PWD;
@@ -23,6 +24,7 @@ async function main() {
 
     client.on("message", async (topic, buf) => {
         console.log(topic, buf.toString());
+
         const [d, deviceId, p] = topic.split("/");
 
         if (d !== 'devices' || typeof deviceId !== 'string' || p !== 'posture') {
@@ -41,10 +43,12 @@ async function main() {
         if (!isObject(sensors)) return;
 
         const {
-            GPIO14,
-            GPIO25,
-            GPIO26,
-            GPIO27,
+            GPIO2,
+            GPIO3,
+            GPIO4,
+            GPIO5,
+            GPIO6,
+            GPIO7,
             GPIO32,
             GPIO33,
             GPIO34,
@@ -57,16 +61,18 @@ async function main() {
             deviceId,
             deviceTimestamp: int(timestamp),
             label: str(posture),
-            gpio14: int(GPIO14),
-            gpio25: int(GPIO25),
-            gpio26: int(GPIO26),
-            gpio27: int(GPIO27),
-            gpio32: int(GPIO32),
-            gpio33: int(GPIO33),
-            gpio34: int(GPIO34),
-            gpio35: int(GPIO35),
-            gpio36: int(GPIO36),
-            gpio39: int(GPIO39),
+            gpio2: str(GPIO2),
+            gpio3: str(GPIO3),
+            gpio4: str(GPIO4),
+            gpio5: str(GPIO5),
+            gpio6: str(GPIO6),
+            gpio7: str(GPIO7),
+            gpio32: str(GPIO32),
+            gpio33: str(GPIO33),
+            gpio34: str(GPIO34),
+            gpio35: str(GPIO35),
+            gpio36: str(GPIO36),
+            gpio39: str(GPIO39),
         };
 
         await repo.insertPosture(insert)
@@ -88,6 +94,7 @@ function isObject(x: unknown): x is Record<string, unknown> {
 
 function str(x: unknown): string | undefined {
     if (typeof x === 'string') return x;
+    if (typeof x === 'number') return x.toString();
 }
 
 

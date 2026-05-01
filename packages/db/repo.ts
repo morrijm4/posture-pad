@@ -39,7 +39,7 @@ export class Repository {
     }
 
     async insertPosture(row: typeof postureTable.$inferInsert) {
-        await this.db.insert(postureTable).values(row);
+        return this.db.insert(postureTable).values(row).returning();
     }
 
     async close() {
