@@ -110,7 +110,7 @@ export default function Page() {
 
         if (i === stages.length - 1) {
             try {
-                const res = await fetch("http://pp.mattymo.dev/train", {
+                const res = await fetch("https://pp.mattymo.dev/train", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
